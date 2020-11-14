@@ -15,13 +15,15 @@
 
 int main(int argc, char *argv[])
 {
-	pid_t childpid = fork();
+	pid_t childpid = fork(), temp;
 
 	if (childpid == -1)
 	{
 		perror("Can't fork");
 		exit(1);
 	}
+	
+	temp = childpid;
 	
 	if (childpid == 0)	// Потомок 
 	{
@@ -30,9 +32,7 @@ int main(int argc, char *argv[])
 		printf("\nChild:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 	}
 	else	// Предок
-	{
-		printf("Parent: id = %d	group_id  = %d \tchildren = %d\n", getpid(), getpgrp(), childpid);
-		
+	{	
 		childpid = fork();
 		
 		if (childpid == -1)
@@ -46,6 +46,10 @@ int main(int argc, char *argv[])
 			printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 			sleep(1);
 			printf("\nChild:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+		}
+		else
+		{
+			printf("Parent: id = %d	group_id  = %d \tchildren = %d %d\n", getpid(), getpgrp(), temp, childpid);
 		}
 	}
 
