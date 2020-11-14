@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	}
 	else	// Предок
 	{
-		printf("Parent: id = %d	group_id  = %d \tchildren = %d\n", getpid(), getpgrp(), childpid);
+		printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
 		
 		childpid = fork();
 		
