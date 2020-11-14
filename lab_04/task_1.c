@@ -1,41 +1,54 @@
 /*
 Написать программу, запускающую не мене двух новых процессов системным вызовом fork(). 
-
 В предке вывести собственный идентификатор (функция getpid()), 
 идентификатор группы (функция getpgrp()) и идентификаторы потомков. 
-
 В процессе-потомке вывести собственный идентификатор, 
 идентификатор предка (функция getppid()) и идентификатор группы. 
-
 Убедиться, что при завершении процесса-предка потомок, который продолжает выполняться,
 получает идентификатор предка (PPID), равный 1 или идентификатор процесса-посредника.
 */
 
+#include <sys/types.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-int main()
+int main(int argc, char *argv[])
 {
-	pid_t childpid;
+	pid_t childpid = fork();
 
-	if ((chiltpid = fork()) == -1)
+	if (childpid == -1)
 	{
-		//sleep(5);
 		perror("Can't fork");
-		
 		exit(1);
 	}
 	
 	if (childpid == 0)	// Потомок 
 	{
-		printf("Child: id = %d parent_id = %d group_id = %d ", getpid(), getppid(), getpgrp());
-
-		return 0;
+		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+		sleep(1);
+		printf("\nChild:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 	}
-	else (childpid == 1)	// Предок
+	else	// Предок
 	{
-		printf("Parent: id = %d	group_id = %d children = %d\n", getpid(), getpgrp(), ******);
+		printf("Parent: id = %d	group_id  = %d \tchildren = %d\n", getpid(), getpgrp(), childpid);
 		
-		return 0;
+		childpid = fork();
+		
+		if (childpid == -1)
+		{
+			perror("Can't fork");
+			exit(1);
+		}
+		
+		if (childpid == 0)	// Потомок 
+		{
+			printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+			sleep(1);
+			printf("\nChild:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+		}
 	}
-{
+
+	return 0;
+}
+
