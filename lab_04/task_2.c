@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 		
 		for (int i = 0; i < 2; i++)
 		{
+			printf("\n--- Parent is waiting ---");
 			childpid = wait(&status);
 			printf("\nChild finished: pid = %d\n", childpid);
 			
