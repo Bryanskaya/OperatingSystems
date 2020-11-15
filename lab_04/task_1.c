@@ -15,55 +15,31 @@
 
 int main(int argc, char *argv[])
 {
-<<<<<<< HEAD
 	pid_t childpid_1 = fork(), childpid_2;
 
 	if (childpid_1 == -1)
-=======
-	pid_t childpid = fork(), temp;
-
-	if (childpid == -1)
->>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 	{
 		perror("Can't fork");
 		exit(1);
 	}
-	
-<<<<<<< HEAD
+
 	if (childpid_1 == 0)		// Потомок 
-=======
-	temp = childpid;
-	
-	if (childpid == 0)	// Потомок 
->>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 	{
 		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 		sleep(1);
 		printf("\nChild:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 	}
-<<<<<<< HEAD
 	else						// Предок
 	{	
 		childpid_2 = fork();
-		
+
 		if (childpid_2 == -1)
-=======
-	else	// Предок
-	{	
-		childpid = fork();
-		
-		if (childpid == -1)
->>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 		{
 			perror("Can't fork");
 			exit(1);
 		}
-		
-<<<<<<< HEAD
+
 		if (childpid_2 == 0)	// Потомок 
-=======
-		if (childpid == 0)	// Потомок 
->>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 		{
 			printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 			sleep(1);
@@ -71,11 +47,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-<<<<<<< HEAD
 			printf("Parent: id = %d	group_id  = %d \tchildren = %d %d\n", getpid(), getpgrp(), childpid_1, childpid_2);
-=======
-			printf("Parent: id = %d	group_id  = %d \tchildren = %d %d\n", getpid(), getpgrp(), temp, childpid);
->>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 		}
 	}
 

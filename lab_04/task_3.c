@@ -19,50 +19,38 @@ int main(int argc, char *argv[])
 		perror("Can't fork");
 		exit(1);
 	}
-	
-<<<<<<< HEAD
+
 	if (childpid == 0)			// Потомок 
-=======
-	if (childpid == 0)	// Потомок 
->>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 	{
 		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 		execl("/bin/date", "date", NULL);
 	}
-<<<<<<< HEAD
 	else						// Предок
-=======
-	else	// Предок
->>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 	{
 		printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
-		
+
 		childpid = fork();
-		
+
 		if (childpid == -1)
 		{
 			perror("Can't fork");
 			exit(1);
 		}
-		
-<<<<<<< HEAD
+
 		if (childpid == 0)		// Потомок 
-=======
-		if (childpid == 0)	// Потомок 
->>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 		{	
 			printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 			execl("/bin/date", "date", NULL);
-			
+
 			return 0;
 		}
-		
+
 		for (int i = 0; i < 2; i++)
 		{
 			printf("\n--- Parent is waiting ---");
 			childpid = wait(&status);
 			printf("\nChild finished: pid = %d\n", childpid);
-			
+
 			if (WIFEXITED(status))
 				printf("Child exited with code %d\n", WEXITSTATUS(status));
 			else printf("Child terminated abnormally\n");
