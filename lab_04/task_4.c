@@ -37,7 +37,10 @@ int main(int argc, char *argv[])
 		
 		sprintf(send_msg1, "Hello, it's child %d", getpid());
 		write(fd[1], send_msg1, sizeof(send_msg1));
+<<<<<<< HEAD
 		sleep(1);
+=======
+>>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 		printf("\n- Child %d sent: %s\n", getpid(), send_msg1);
 		
 		close(fd[1]);	
@@ -61,7 +64,11 @@ int main(int argc, char *argv[])
 			sprintf(send_msg2, "Hello, it's child %d", getpid());
 			write(fd[1], send_msg2, sizeof(send_msg2));
 			close(fd[1]);
+<<<<<<< HEAD
 			sleep(1);
+=======
+			
+>>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 			printf("\n- Child %d sent: %s\n", getpid(), send_msg2);
 			
 			return 0;

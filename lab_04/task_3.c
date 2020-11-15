@@ -20,12 +20,20 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
+<<<<<<< HEAD
 	if (childpid == 0)			// Потомок 
+=======
+	if (childpid == 0)	// Потомок 
+>>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 	{
 		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 		execl("/bin/date", "date", NULL);
 	}
+<<<<<<< HEAD
 	else						// Предок
+=======
+	else	// Предок
+>>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 	{
 		printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
 		
@@ -37,7 +45,11 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 		
+<<<<<<< HEAD
 		if (childpid == 0)		// Потомок 
+=======
+		if (childpid == 0)	// Потомок 
+>>>>>>> e75798cb3076656aad17e17538666aa8e2cbe0b1
 		{	
 			printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 			execl("/bin/date", "date", NULL);
