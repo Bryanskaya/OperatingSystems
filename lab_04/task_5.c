@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef void (*sighandler_t)(int);
+
 
 pid_t childpid_1, childpid_2;
 int send_signal_1 = 0, send_signal_2 = 0;
@@ -22,22 +24,32 @@ void action(int sig_numb)
 		send_signal_2 = 1;				
 }
 
+
 int main(int argc, char *argv[])
 {
 	int fd[2];
 	int status;
 	char get_msg[25];
 	char send_msg1[25], send_msg2[25];
-
-	signal(SIGTSTP, action);				// Ctrl-z
-	signal(SIGQUIT, action);				// Ctrl-'\'
-
+	
+	if (signal(SIGTSTP, action) == SIG_ERR)				// Ctrl-z
+	{
+		printf("Signal error");
+		exit(1);
+	}
+	
+	if (signal(SIGQUIT, action) == SIG_ERR)				// Ctrl-'\'
+	{
+		printf("Signal error");
+		exit(1);
+	}
+			
 	if (pipe(fd) == -1)
 	{
 		perror("Can't pipe");
 		exit(1);
 	}
-
+	
 	childpid_1 = fork();
 
 	if (childpid_1 == -1)
@@ -45,75 +57,130 @@ int main(int argc, char *argv[])
 		perror("Can't fork");
 		exit(1);
 	}
-
-	if (childpid_1 == 0)				// Потомок 
+	
+	if (childpid_1 == 0)
 	{
 		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
-
-		close(fd[0]);
-		sleep(1);
-		sprintf(send_msg1, "Hello, it's child %d", getpid());
-		write(fd[1], send_msg1, sizeof(send_msg1));
-		printf("\n- Child %d sent: %s\n", getpid(), send_msg1);
-
-		close(fd[1]);	
-
-		signal(SIGQUIT, SIG_IGN);		// Ctrl-'\'
-		sleep(5);
-
-		if (send_signal_1)
-			printf("Child %d received signal\n", getpid()); 
-	}
-	else								// Предок
-	{
-		printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
-
-		childpid_2 = fork();
-
-		if (childpid_2 == -1)
+		
+		if (close(fd[0]) == -1)
 		{
-			perror("Can't fork");
+			printf("Close error");
 			exit(1);
 		}
-
-		if (childpid_2 == 0)			// Потомок 
+		
+		sleep(1);
+		sprintf(send_msg1, "Hello, it's child %d", getpid());
+		status = write(fd[1], send_msg1, sizeof(send_msg1));
+		if (status == -1)
 		{
-			printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
-			sleep(1);
-			sprintf(send_msg2, "Hello, it's child %d", getpid());
-			write(fd[1], send_msg2, sizeof(send_msg2));
-			close(fd[1]);
-
-			printf("\n- Child %d sent: %s\n", getpid(), send_msg2);
-
-			signal(SIGTSTP, SIG_IGN);		// Ctrl-z
-			sleep(5);
-
-			if (send_signal_2)
-				printf("Child %d received signal\n", getpid());
-
-			return 0;
+			printf("Write error");
+			exit(1);
 		}
-
-		for (int i = 0; i < 2; i++)
+		
+		printf("\n- Child %d sent: %s\n", getpid(), send_msg1);
+		
+		if (close(fd[1]) == -1)
 		{
-			pid_t childpid = wait(&status);
-			printf("\nChild finished: pid = %d\n", childpid);
-
-			if (WIFEXITED(status))
-				printf("Child exited with code %d\n", WEXITSTATUS(status));
-			else printf("Child terminated abnormally\n");
+			printf("Close error");
+			exit(1);
 		}
+		
+		if (signal(SIGQUIT, SIG_IGN) == SIG_ERR)		// Ctrl-'\'
+		{
+			printf("Signal error");
+			exit(1);
+		}
+		
+		sleep(5);
+					
+		if (send_signal_1)
+			printf("Child %d received signal\n", getpid()); 
+			
+		return 0;
+	}
 
-		close(fd[1]);
+	printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
+	
+	childpid_2 = fork();
+	
+	if (childpid_2 == -1)
+	{
+		perror("Can't fork");
+		exit(1);
+	}
+	
+	if (childpid_2 == 0)
+	{
+		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+		sleep(1);
+		sprintf(send_msg2, "Hello, it's child %d", getpid());
+		status = write(fd[1], send_msg2, sizeof(send_msg2));
+		if (status == -1)
+		{
+			printf("Write error");
+			exit(1);
+		}
+		
+		if (close(fd[1]) == -1)
+		{
+			printf("Close error");
+			exit(1);
+		}
+		
+		printf("\n- Child %d sent: %s\n", getpid(), send_msg2);
+		
+		if (signal(SIGTSTP, SIG_IGN) == SIG_ERR)		// Ctrl-z
+		{
+			printf("Signal error");
+			exit(1);
+		}
+		
+		sleep(5);
+		
+		if (send_signal_2)
+			printf("Child %d received signal\n", getpid());
 
-		read(fd[0], get_msg, sizeof(send_msg1));
-		printf("\n--> Parent read: %s\n", get_msg);
-
-		read(fd[0], get_msg, sizeof(send_msg2));
-		printf("\n--> Parent read: %s\n", get_msg);
-
-		close(fd[0]);
+		return 0;
+	}
+	
+	for (int i = 0; i < 2; i++)
+	{
+		pid_t childpid = wait(&status);// WAIT
+		printf("\nChild finished: pid = %d\n", childpid);
+		
+		if (WIFEXITED(status))
+			printf("Child exited with code %d\n", WEXITSTATUS(status));
+		else printf("Child terminated abnormally\n");
+	}
+	
+	if (close(fd[1]) == -1)
+	{
+		printf("Close error");
+		exit(1);
+	}
+	
+	status = read(fd[0], get_msg, sizeof(send_msg1));
+	if (status == -1)
+	{
+		printf("Read error");
+		exit(1);
+	}
+	
+	printf("\n--> Parent read: %s\n", get_msg);
+	
+	status = read(fd[0], get_msg, sizeof(send_msg2));
+	if (status == -1)
+	{
+		printf("Read error");
+		exit(1);
+	}
+	
+	printf("\n--> Parent read: %s\n", get_msg);
+	
+	if (close(fd[0]) == -1)
+	{
+		printf("Close error");
+		exit(1);
 	}
 
 	return 0;

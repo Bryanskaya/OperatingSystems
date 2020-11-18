@@ -9,6 +9,33 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+
+int child_action_1()
+{
+	char temp[10];
+	int status;
+
+	printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+	
+	sprintf(temp, "%d", getpid());
+	status = execl("add_program_1.o", "add_program_1.o", temp, NULL);
+	
+	return status;
+}
+
+int child_action_2()
+{
+	char temp[10];
+	int status;
+
+	printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+	
+	status = execl("add_program_2.o", "", NULL);
+	
+	return status;
+}
+
+
 int main(int argc, char *argv[])
 {
 	pid_t childpid = fork();
@@ -20,41 +47,50 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (childpid == 0)			// Потомок 
+	if (childpid == 0)		
 	{
-		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
-		execl("/bin/date", "date", NULL);
-	}
-	else						// Предок
-	{
-		printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
-
-		childpid = fork();
-
-		if (childpid == -1)
+		status = child_action_1();
+		if (status == -1)
 		{
-			perror("Can't fork");
+			printf("Execl error");
 			exit(1);
 		}
+		
+		return 0;
+	}
 
-		if (childpid == 0)		// Потомок 
-		{	
-			printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
-			execl("/bin/date", "date", NULL);
+	printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
 
-			return 0;
-		}
+	childpid = fork();
 
-		for (int i = 0; i < 2; i++)
+	if (childpid == -1)
+	{
+		perror("Can't fork");
+		exit(1);
+	}
+
+	if (childpid == 0)
+	{	
+		status = child_action_2();
+		if (status == -1)
 		{
-			printf("\n--- Parent is waiting ---");
-			childpid = wait(&status);
-			printf("\nChild finished: pid = %d\n", childpid);
-
-			if (WIFEXITED(status))
-				printf("Child exited with code %d\n", WEXITSTATUS(status));
-			else printf("Child terminated abnormally\n");
+			printf("Execl error");
+			exit(1);
 		}
+		
+		return 0;
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		printf("\n--- Parent is waiting ---");
+		
+		childpid = wait(&status); // нужно ли отдельно смотреть wait ведь мы дальше его смотрим с макросами
+		printf("\nChild finished: pid = %d\n", childpid);
+
+		if (WIFEXITED(status))
+			printf("Child exited with code %d\n", WEXITSTATUS(status));
+		else printf("Child terminated abnormally\n");
 	}
 
 	return 0;

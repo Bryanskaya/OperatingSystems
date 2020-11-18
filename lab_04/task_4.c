@@ -14,13 +14,13 @@ int main(int argc, char *argv[])
 	int status;
 	char get_msg[25];
 	char send_msg1[25], send_msg2[25];
-
+	
 	if (pipe(fd) == -1)
 	{
 		perror("Can't pipe");
 		exit(1);
 	}
-
+	
 	pid_t childpid = fork();
 
 	if (childpid == -1)
@@ -28,64 +28,116 @@ int main(int argc, char *argv[])
 		perror("Can't fork");
 		exit(1);
 	}
-
-	if (childpid == 0)	// Потомок 
+	
+	if (childpid == 0) // Выносить ли детей в функции (оин получаются разные в силу разных close)
 	{
 		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
-
-		close(fd[0]);
-
-		sprintf(send_msg1, "Hello, it's child %d", getpid());
-		write(fd[1], send_msg1, sizeof(send_msg1));
-		sleep(1);
-		printf("\n- Child %d sent: %s\n", getpid(), send_msg1);
-
-		close(fd[1]);	
-	}
-	else	// Предок
-	{
-		printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
-
-		childpid = fork();
-
-		if (childpid == -1)
+		
+		if (close(fd[0]) == -1)
 		{
-			perror("Can't fork");
+			printf("Close error");
 			exit(1);
 		}
-
-		if (childpid == 0)	// Потомок 
+		
+		sprintf(send_msg1, "Hello, it's child %d", getpid());
+		status = write(fd[1], send_msg1, sizeof(send_msg1));
+		if (status == -1)
 		{
-			printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
-
-			sprintf(send_msg2, "Hello, it's child %d", getpid());
-			write(fd[1], send_msg2, sizeof(send_msg2));
-			close(fd[1]);
-			sleep(1);
-			printf("\n- Child %d sent: %s\n", getpid(), send_msg2);
-
-			return 0;
+			printf("Write error");
+			exit(1);
 		}
-
-		for (int i = 0; i < 2; i++)
+		
+		if (close(fd[1]) == -1)
 		{
-			childpid = wait(&status);
-			printf("\nChild finished: pid = %d\n", childpid);
-
-			if (WIFEXITED(status))
-				printf("Child exited with code %d\n", WEXITSTATUS(status));
-			else printf("Child terminated abnormally\n");
+			printf("Close error");
+			exit(1);
 		}
+		
+		sleep(1);
+		printf("\n- Child %d sent: %s\n", getpid(), send_msg1);
+		
+		return 0;
+	}
 
-		close(fd[1]);
-
-		read(fd[0], get_msg, sizeof(send_msg1));
-		printf("\n--> Parent read: %s\n", get_msg);
-
-		read(fd[0], get_msg, sizeof(send_msg2));
-		printf("\n--> Parent read: %s\n", get_msg);
-
-		close(fd[0]);
+	printf("Parent: id = %d	group_id  = %d\n", getpid(), getpgrp());
+	
+	childpid = fork();
+	
+	if (childpid == -1)
+	{
+		perror("Can't fork");
+		exit(1);
+	}
+	
+	if (childpid == 0) 
+	{
+		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+		
+		/*Надо?
+		if (close(fd[0]) == -1)
+		{
+			printf("Close error");
+			exit(1);
+		}
+		*/
+		sprintf(send_msg2, "Hello, it's child %d", getpid());
+		status = write(fd[1], send_msg2, sizeof(send_msg2));
+		if (status == -1)
+		{
+			printf("Write error");
+			exit(1);
+		}
+		
+		if (close(fd[1]) == -1)
+		{
+			printf("Close error");
+			exit(1);
+		}
+		
+		sleep(1);
+		printf("\n- Child %d sent: %s\n", getpid(), send_msg2);
+		
+		return 0;
+	}
+	
+	for (int i = 0; i < 2; i++)
+	{
+		childpid = wait(&status); // нужно ли отдельно смотреть wait ведь мы дальше его смотрим с макросами
+		printf("\nChild finished: pid = %d\n", childpid);
+		
+		if (WIFEXITED(status))
+			printf("Child exited with code %d\n", WEXITSTATUS(status));
+		else printf("Child terminated abnormally\n");
+	}
+	
+	if (close(fd[1]) == -1)
+	{
+		printf("Close error");
+		exit(1);
+	}
+	
+	status = read(fd[0], get_msg, sizeof(send_msg1));
+	if (status == -1)
+	{
+		printf("Read error");
+		exit(1);
+	}
+	
+	printf("\n--> Parent read: %s\n", get_msg);
+	
+	status = read(fd[0], get_msg, sizeof(send_msg2));
+	if (status == -1)
+	{
+		printf("Read error");
+		exit(1);
+	}
+	
+	printf("\n--> Parent read: %s\n", get_msg);
+	
+	if (close(fd[0]) == -1)
+	{
+		printf("Close error");
+		exit(1);
 	}
 
 	return 0;

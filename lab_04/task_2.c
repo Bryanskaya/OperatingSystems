@@ -8,6 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+void child_action()
+{
+	printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+}
+
 int main(int argc, char *argv[])
 {
 	pid_t childpid_1 = fork(), childpid_2;
@@ -19,39 +25,38 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (childpid_1 == 0)			// Потомок 
+	if (childpid_1 == 0)
 	{
-		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+		child_action();
+		return 0;
 	}
-	else							// Предок
+	
+	childpid_2 = fork();
+
+	if (childpid_2 == -1)
 	{
-		childpid_2 = fork();
+		perror("Can't fork");
+		exit(1);
+	}
 
-		if (childpid_2 == -1)
-		{
-			perror("Can't fork");
-			exit(1);
-		}
+	if (childpid_2 == 0)
+	{
+		child_action();
+		return 0;
+	}
 
-		if (childpid_2 == 0)		// Потомок 
-		{
-			printf("\nChild:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
-			return 0;
-		}
+	printf("Parent: id = %d	group_id  = %d \tchildren = %d %d\n", getpid(), getpgrp(), childpid_1, childpid_2);
 
-		printf("Parent: id = %d	group_id  = %d \tchildren = %d %d\n", getpid(), getpgrp(), childpid_1, childpid_2);
+	for (int i = 0; i < 2; i++)
+	{
+		printf("\n--- Parent is waiting ---");
+		
+		pid_t childpid = wait(&status); // нужно ли отдельно смотреть wait ведь мы дальше его смотрим с макросами
+		printf("\nChild finished: pid = %d\n", childpid);
 
-		for (int i = 0; i < 2; i++)
-		{
-			printf("\n--- Parent is waiting ---");
-			pid_t childpid = wait(&status);
-			printf("\nChild finished: pid = %d\n", childpid);
-
-			if (WIFEXITED(status))
-				printf("Child exited with code %d\n", WEXITSTATUS(status));
-			else printf("Child terminated abnormally\n");
-		}
-
+		if (WIFEXITED(status))
+			printf("Child exited with code %d\n", WEXITSTATUS(status));
+		else printf("Child terminated abnormally\n");
 	}
 
 	return 0;
