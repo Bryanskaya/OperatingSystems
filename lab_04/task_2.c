@@ -51,7 +51,13 @@ int main(int argc, char *argv[])
 	{
 		printf("\n--- Parent is waiting ---");
 		
-		pid_t childpid = wait(&status); // нужно ли отдельно смотреть wait ведь мы дальше его смотрим с макросами
+		pid_t childpid = wait(&status);
+		if (childpid == -1)
+		{
+			printf("Wait error");
+			exit(1);
+		}
+		
 		printf("\nChild finished: pid = %d\n", childpid);
 
 		if (WIFEXITED(status))
