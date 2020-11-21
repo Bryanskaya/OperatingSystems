@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 
 void child_action()
@@ -54,17 +55,40 @@ int main(int argc, char *argv[])
 		pid_t childpid = wait(&status);
 		if (childpid == -1)
 		{
-			printf("Wait error");
+			if (errno == ECHILD)
+				printf("Process does not have any unwaited for children\n");
+			else if (errno == EINTR)
+				printf("Call interrupted by signal\n");
+			else if (errno == EINVAL)
+				printf("Wrong argument\n");
 			exit(1);
 		}
 		
 		printf("\nChild finished: pid = %d\n", childpid);
 
 		if (WIFEXITED(status))
-			printf("Child exited with code %d\n", WEXITSTATUS(status));
+			printf("Child exited normally with code %d\n", WEXITSTATUS(status));
 		else printf("Child terminated abnormally\n");
+		
+		if (WIFSIGNALED(status))
+			printf("Child exited due to uncaught signal # %d\n", WTERMSIG(status));
+			
+		if (WIFSTOPPED(status))
+			printf("Child stopped, signal # %d\n", WSTOPSIG(status));
 	}
 
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
