@@ -14,12 +14,14 @@
 int send_signal_1 = 0, send_signal_2 = 0;
 
 
-void action(int sig_numb)
+void action_1(int sig_numb)					// Ctrl-z
 {	
-	if (sig_numb == SIGTSTP)				// Ctrl-z
-		send_signal_1 = 1;					
-	else									// Ctrl-'\'
-		send_signal_2 = 1;				
+	send_signal_1 = 1;								
+}
+
+void action_2(int sig_numb)					// Ctrl-'\'
+{										
+	send_signal_2 = 1;				
 }
 
 int main(int argc, char *argv[])
@@ -29,7 +31,7 @@ int main(int argc, char *argv[])
 	char get_msg[25], send_msg[25];
 	pid_t childpid_1, childpid_2;
 	
-	if (signal(SIGTSTP, action) == SIG_ERR || signal(SIGQUIT, action) == SIG_ERR)    // Ctrl-z и Ctrl-'\'
+	if (signal(SIGTSTP, action_1) == SIG_ERR || signal(SIGQUIT, action_2) == SIG_ERR)    // Ctrl-z и Ctrl-'\'
 	{
 		printf("Signal error");
 		exit(1);
@@ -51,17 +53,17 @@ int main(int argc, char *argv[])
 	
 	if (childpid_1 == 0)
 	{
+		if (close(fd[0]) == -1)
+		{
+			printf("Close error");
+			exit(1);
+		}
+		
 		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 		
 		if (signal(SIGQUIT, SIG_IGN) == SIG_ERR)		// Ctrl-'\'
 		{
 			printf("Signal error");
-			exit(1);
-		}
-			
-		if (close(fd[0]) == -1)
-		{
-			printf("Close error");
 			exit(1);
 		}
 	
@@ -101,17 +103,17 @@ int main(int argc, char *argv[])
 	
 	if (childpid_2 == 0)
 	{
+		if (close(fd[0]) == -1)
+		{
+			printf("Close error");
+			exit(1);
+		}
+		
 		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
 		
 		if (signal(SIGTSTP, SIG_IGN) == SIG_ERR)		// Ctrl-'\'
 		{
 			printf("Signal error");
-			exit(1);
-		}
-			
-		if (close(fd[0]) == -1)
-		{
-			printf("Close error");
 			exit(1);
 		}
 		
@@ -139,6 +141,12 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	
+	if (close(fd[1]) == -1)
+	{
+		printf("Close error");
+		exit(1);
+	}
+	
 	for (int i = 0; i < 2; i++)
 	{
 		pid_t childpid = wait(&status);
@@ -164,12 +172,6 @@ int main(int argc, char *argv[])
 			
 		if (WIFSTOPPED(status))
 			printf("Child stopped, signal # %d\n", WSTOPSIG(status));
-	}
-	
-	if (close(fd[1]) == -1)
-	{
-		printf("Close error");
-		exit(1);
 	}
 	
 	if (send_signal_1)

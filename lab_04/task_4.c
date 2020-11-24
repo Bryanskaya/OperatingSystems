@@ -10,44 +10,11 @@
 #include <errno.h>
 
 
-int child_action(int fd[])
-{
-	char send_msg[25];
-	int status;
-
-	printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
-	
-	if (close(fd[0]) == -1)
-	{
-		printf("Close error");
-		return -1;
-	}
-	
-	sprintf(send_msg, "Hello, it's child %d", getpid());
-	status = write(fd[1], send_msg, sizeof(send_msg));
-	if (status == -1)
-	{
-		printf("Write error");
-		return -1;
-	}
-	
-	if (close(fd[1]) == -1)
-	{
-		printf("Close error");
-		return -1;
-	}
-	
-	sleep(1);
-	printf("\n- Child %d sent: %s\n", getpid(), send_msg);
-	
-	return 0;
-}
-
 int main(int argc, char *argv[])
 {
 	int fd[2];
 	int status;
-	char get_msg[25];
+	char get_msg[25], send_msg[25];
 	
 	if (pipe(fd) == -1)
 	{
@@ -65,9 +32,30 @@ int main(int argc, char *argv[])
 	
 	if (childpid == 0) 
 	{
-		status = child_action(fd);
-		if (status)
+		if (close(fd[0]) == -1)
+		{
+			printf("Close error");
 			exit(1);
+		}
+		
+		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+		
+		sprintf(send_msg, "Hello, it's child %d", getpid());
+		status = write(fd[1], send_msg, sizeof(send_msg));
+		if (status == -1)
+		{
+			printf("Write error");
+			exit(1);
+		}
+		
+		if (close(fd[1]) == -1)
+		{
+			printf("Close error");
+			exit(1);
+		}
+		
+		sleep(1);
+		printf("\n- Child %d sent: %s\n", getpid(), send_msg);
 		
 		return 0;
 	}
@@ -84,11 +72,38 @@ int main(int argc, char *argv[])
 	
 	if (childpid == 0) 
 	{
-		status = child_action(fd);
-		if (status)
+		if (close(fd[0]) == -1)
+		{
+			printf("Close error");
 			exit(1);
+		}
+		
+		printf("Child:  id = %d \tparent_id = %d \tgroup_id = %d\n", getpid(), getppid(), getpgrp());
+		
+		sprintf(send_msg, "Hello, it's child %d", getpid());
+		status = write(fd[1], send_msg, sizeof(send_msg));
+		if (status == -1)
+		{
+			printf("Write error");
+			exit(1);
+		}
+		
+		if (close(fd[1]) == -1)
+		{
+			printf("Close error");
+			exit(1);
+		}
+		
+		sleep(1);
+		printf("\n- Child %d sent: %s\n", getpid(), send_msg);
 		
 		return 0;
+	}
+	
+	if (close(fd[1]) == -1)
+	{
+		printf("Close error");
+		exit(1);
 	}
 	
 	for (int i = 0; i < 2; i++)
@@ -116,12 +131,6 @@ int main(int argc, char *argv[])
 			
 		if (WIFSTOPPED(status))
 			printf("Child stopped, signal # %d\n", WSTOPSIG(status));
-	}
-	
-	if (close(fd[1]) == -1)
-	{
-		printf("Close error");
-		exit(1);
 	}
 	
 	status = read(fd[0], get_msg, sizeof(get_msg));
