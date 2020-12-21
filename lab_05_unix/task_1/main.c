@@ -4,94 +4,109 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <wait.h>
+#include <time.h>
 
-#define     SHM_SIZE    1024 //???
-#define     N           10 //????
+#define     N           10
 #define     NUM_PR      3
 
 #define     SE          0
 #define     SF          1
 #define     SB          2
 
-
-struct sembuf prd_before_putting_in_buf[2] = 
+struct sembuf before_putting_in_buf[2] = 
 {
-    {SE, 1, SEM_UNDO},
-    {SB, 1, SEM_UNDO}
+    {SE, -1, SEM_UNDO},
+    {SB, -1, SEM_UNDO}
 };
 
-struct sembuf prd_after_putting_in_buf[2] = 
+struct sembuf after_putting_in_buf[2] = 
 {
-    {SB, -1, SEM_UNDO},
-    {SF, -1, SEM_UNDO}
+    {SB, 1, SEM_UNDO},
+    {SF, 1, SEM_UNDO}
 };
 
-struct sembuf cns_before_taking_from_buf[2] = 
+struct sembuf before_taking_from_buf[2] = 
 {
-    {SF, 1, SEM_UNDO},
-    {SB, 1, SEM_UNDO}
+    {SF, -1, SEM_UNDO},
+    {SB, -1, SEM_UNDO}
 };
 
-struct sembuf cns_after_taking_from_buf[2] = 
+struct sembuf after_taking_from_buf[2] = 
 {
-    {SB, -1, SEM_UNDO},
-    {SE, -1, SEM_UNDO}
+    {SB, 1, SEM_UNDO},
+    {SE, 1, SEM_UNDO}
 };
 
 
-int action_producer(int cur_id, int n, char* addr)
+int action_producer(int num_pr, int id_sem, int n, char* addr)
 {
     int temp;
+    char cur_letter = 'a';
 
     while (1)
     {
-        temp = semop(cur_id, prd_before_putting_in_buf, 2);
+        sleep(rand() % 4 + 1);
+
+        temp = semop(id_sem, before_putting_in_buf, 2);
         if (temp == -1)
         {
             perror("semop error");
             return 6;
         }
 
-        // n += 1
+        addr[addr[1]] = cur_letter;
+        printf(">> PRODUCER %d: put %c\n", num_pr + 1, cur_letter);
+        cur_letter++;
 
-        temp = semop(cur_id, prd_after_putting_in_buf, 2);
+        if (cur_letter > 'z')
+            cur_letter = 'a';
+
+        (addr[1])++;
+
+        if (addr[1] > n - 1)
+            addr[1] = 2;
+
+        temp = semop(id_sem, after_putting_in_buf, 2);
         if (temp == -1)
         {
             perror("semop error");
             return 6;
         }
-
-        //
-
     }
 
     return 0;
 }
 
-int action_consumer(int cur_id, int n, char* addr)
+int action_consumer(int num_cn, int cur_id, int n, char* addr)
 {
     int temp;
 
     while (1)
     {
-        temp = semop(cur_id, cns_before_taking_from_buf, 2);
+        sleep(rand() % 4 + 1);
+
+        temp = semop(cur_id, before_taking_from_buf, 2);
         if (temp == -1)
         {
             perror("semop error");
             return 6;
         }
 
-        // n += 1
+        printf(">> CONSUMER %d: took %c\n", num_cn + 1, addr[addr[0]]);
+        addr[0]++;
 
-        temp = semop(cur_id, cns_after_taking_from_buf, 2);
+        if (addr[0] > n - 1)
+            addr[0] = 2;
+
+        temp = semop(cur_id, after_taking_from_buf, 2);
         if (temp == -1)
         {
             perror("semop error");
             return 6;
         }
-
-        //
-
     }
 
     return 0;
@@ -100,23 +115,28 @@ int action_consumer(int cur_id, int n, char* addr)
 
 int main()
 {
-    int perms = S_IRWXU | S_IRWXG | S_IRWXO;    // Право на чтение/запись и выполнение для владельца-пользователя | тоже самое только для группы | для остальных пользователей
-    int se, sf, sb, res;
+    srand(time(NULL));
+
+    int perms = S_IRWXU | S_IRWXG | S_IRWXO;
+    int se, sf, sb, res, status, temp_id1, temp_id2;
     pid_t producers[NUM_PR], consumers[NUM_PR];
 
-    int id_shm = shmget(IPC_PRIVATE, SHM_SIZE, IPC_CREAT | perms); // Создаем разделяемый сегмент памяти, возв идентификатор
+    int id_shm = shmget(IPC_PRIVATE, (N + 2) * sizeof(char), IPC_CREAT | perms);
     if (id_shm == -1)
     {
         perror("shmget error");
         exit(1);
     }
 
-    char* addr = (char*)shmat(id_shm, 0, 0); // shmat возвращает указатель на сегмент, первый 0 - система сама выбирает подходящий адрес, второй 0 - должен быть флаг
-    if (addr == (char*)-1) // int или char
+    char* addr = (char*)shmat(id_shm, 0, 0);
+    if (addr == (char*)-1)
     {
         perror("shmat error");
         exit(2);
     }
+
+    addr[0] = (char)2;
+    addr[1] = (char)2;
 
     int id_sem = semget(IPC_PRIVATE, 3, IPC_CREAT | perms);
     if (id_sem == -1)
@@ -146,10 +166,12 @@ int main()
 
         if (producers[i] == 0)
         {
-            res = action_producer(id_sem, N, addr);
+            res = action_producer(i, id_sem, N + 2, addr);
             if (res)
                 exit(res);
         }
+
+        rand();
 
         consumers[i] = fork();
         if (consumers[i] == -1)
@@ -160,16 +182,37 @@ int main()
 
         if (consumers[i] == 0)
         {
-            res = action_consumer(id_sem, N, addr);
+            res = action_consumer(i, id_sem, N + 2, addr);
             if (res)
                 exit(res);
         }
-            
 
-        // что-то с задержками
+        rand();
     }
 
+    for (int i = 0; i < NUM_PR; i++)
+    {
+        temp_id1 = wait(&status);
+        temp_id2 = wait(&status);
+        
+        if (temp_id1 == -1 || temp_id2 == -1)
+        {
+            perror("wait error");
+            exit(7);
+        }
+    }
 
+    if (shmctl(id_shm, IPC_RMID, NULL) == -1)
+    {
+        perror("shmctl error");
+        exit(4);
+    }
+
+    if (shmctl(id_sem, 0, IPC_RMID) == -1)
+    {
+        perror("shmctl error");
+        exit(4);
+    }
 
     return 0;
 }
