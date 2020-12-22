@@ -188,7 +188,7 @@ int main()
         exit(4);
     }
 
-    *addr = -1; //
+    *addr = -1;
 
     for (int i = 0; i < NUM_W; i++)
     {
