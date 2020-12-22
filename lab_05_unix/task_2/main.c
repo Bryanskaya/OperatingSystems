@@ -1,7 +1,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/sem.h>
+#include <sys/shm.h>
 #include <stdlib.h>
+#include <wait.h>
+#include <sys/ipc.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <time.h>
 
 #define     SWR     0
 #define     SWW     1
@@ -9,51 +15,49 @@
 #define     SAW     3
 
 #define     NUM_W   3
-#define     NUM_R   5
+#define     NUM_R   7
 
 
 struct sembuf can_write_act[3] = 
 {
-    { SAR, 0, IPC_NOWAIT }, 
-    { SAW, 0, IPC_NOWAIT },
-    { SAW, 1, 0 }
+    { SAR, 0, SEM_UNDO }, 
+    { SAW, 0, SEM_UNDO },
+    { SAW, 1, SEM_UNDO }
 };
 
 struct sembuf start_write_act[2] = 
 {
-    { SAW, 1, 0 },
-    { SWW, -1, 0}
+    { SAW, 1, SEM_UNDO },
+    { SWW, -1, SEM_UNDO }
 };
 
 struct sembuf stop_write_act[1] = 
 {
-    { SAW, -1, 0 }
+    { SAW, -1, SEM_UNDO }
 };
 
 struct sembuf can_read_act[3] = 
 {
-    { SAW, 0, IPC_NOWAIT }, 
-    { SAR, 0, IPC_NOWAIT },
-    { SAR, 1, 0 }
+    { SAW, 0, SEM_UNDO }, 
+    { SAR, 0, SEM_UNDO },
+    { SAR, 1, SEM_UNDO }
 };
 
 struct sembuf start_read_act[2] = 
 {
-    { SAR, 1, 0 },
-    { SWR, -1, 0}
+    { SAR, 1, SEM_UNDO },
+    { SWR, -1, SEM_UNDO }
 };
 
 struct sembuf stop_read_act[1] = 
 {
-    { SWR, -1, 0 }
+    { SAR, -1, SEM_UNDO }
 };
-
-
 
 
 size_t get_len(struct sembuf arr[])
 {
-    return sizeof(arr) / sizeof((arr)[0]);
+    return sizeof(*arr) / sizeof((arr)[0]);
 }
 
 void start_write(int id_sem)
@@ -61,66 +65,87 @@ void start_write(int id_sem)
     int temp = semop(id_sem, can_write_act, get_len(can_write_act));
     if (temp == -1)
     {
-        // действия при ожидании
-        //perror("semop error");
-        return 6;
+        perror("semop error");
+        exit(6);
     }
 	
     temp = semop(id_sem, start_write_act, get_len(start_write_act));
     if (temp == -1)
     {
         perror("semop error");
-        return 6;
+        exit(6);
     }
 }
 
-void stop_write()
+void stop_write(int id_sem)
 {
-
+    int temp = semop(id_sem, stop_write_act, get_len(stop_write_act));
+    if (temp == -1)
+    {
+        perror("semop error");
+        exit(6);
+    }
 }
 
-void start_read()
+void start_read(int id_sem)
 {
-
+    int temp = semop(id_sem, can_read_act, get_len(can_read_act));
+    if (temp == -1)
+    {
+        perror("semop error");
+        exit(6);
+    }
+	
+    temp = semop(id_sem, start_read_act, get_len(start_read_act));
+    if (temp == -1)
+    {
+        perror("semop error");
+        exit(6);
+    }
 }
 
-void stop_read()
+void stop_read(int id_sem)
 {
-
+    int temp = semop(id_sem, stop_read_act, get_len(stop_read_act));
+    if (temp == -1)
+    {
+        perror("semop error");
+         exit(6);
+    }
 }
 
 
-int action_writer(int cur_id, int id_sem, int* addr)
+void action_writer(int cur_id, int id_sem, int* addr)
 {
+    sleep(rand() % 2 + 1);
+
     while (1)
     {
-        sleep(rand() % 4 + 1);
-
         start_write(id_sem);
 
-        (*addr)++; //точто так?
+        (*addr)++;
         printf(">> WRITER %d: wrote %d\n", cur_id, *addr);
 
-        stop_write();
-    }
+        stop_write(id_sem);
 
-    return 0;
+        sleep(rand() % 2 + 1);
+    }
 }
 
-int action_reader(int cur_id, int id_sem, int* addr)
+void action_reader(int cur_id, int id_sem, int* addr)
 {
+    sleep(rand() % 3 + 1);
+
     while (1)
     {
-        sleep(rand() % 4 + 1);
-
-        start_read();
+        start_read(id_sem);
 
         printf(">> READER %d: read %d\n", cur_id, *addr);
 
-        stop_read();
-    }
+        stop_read(id_sem);
 
-    return 0;
+        sleep(rand() % 3 + 1);
+    }
 }
 
 int main()
@@ -131,7 +156,7 @@ int main()
     int swr, sww, sar, saw, res;
     pid_t writers[NUM_W], readers[NUM_R];
 
-    int id_sem = semget(IPC_PRIVATE, 4, IPC_CREAT | perms); // 5
+    int id_sem = semget(IPC_PRIVATE, 4, IPC_CREAT | perms);
     if (id_sem == -1)
     {
         perror("semget error");
@@ -157,11 +182,13 @@ int main()
     }
 
     int* addr = (int*)shmat(id_shm, 0, 0);
-    if (addr == -1)
+    if (addr == (int*)-1)
     {
         perror("shmat error");
         exit(4);
     }
+
+    *addr = -1; //
 
     for (int i = 0; i < NUM_W; i++)
     {
@@ -173,11 +200,9 @@ int main()
         }
 
         if (writers[i] == 0)
-        {
-            res = action_writer(i, id_sem, addr);
-            if (res)
-                exit(res);
-        }
+            action_writer(i, id_sem, addr);
+
+        rand();
     }
 
     for (int i = 0; i < NUM_R; i++)
@@ -190,11 +215,9 @@ int main()
         }
 
         if (readers[i] == 0)
-        {
-            res = action_reader(i, addr);
-            if (res)
-                exit(res);
-        }
+            action_reader(i, id_sem, addr);
+
+        rand();
     }
 
     int status, temp_id;
@@ -215,7 +238,7 @@ int main()
         exit(8);
     }
 
-    if (shmctl(id_sem, 0, IPC_RMID) == -1) //почему у него только saw вместо 0
+    if (shmctl(id_sem, 0, IPC_RMID) == -1)
     {
         perror("shmctl error");
         exit(8);
