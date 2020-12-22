@@ -44,7 +44,6 @@ struct sembuf after_taking_from_buf[2] =
 int action_producer(int num_pr, int id_sem, int n, char* addr)
 {
     int temp;
-    char cur_letter = 'a';
 
     while (1)
     {
@@ -57,17 +56,17 @@ int action_producer(int num_pr, int id_sem, int n, char* addr)
             return 6;
         }
 
-        addr[addr[1]] = cur_letter;
-        printf(">> PRODUCER %d: put %c\n", num_pr + 1, cur_letter);
-        cur_letter++;
+        addr[addr[1]] = addr[2];
+        printf(">> PRODUCER %d: put %c\n", num_pr + 1, addr[2]);
+        addr[2]++;
 
-        if (cur_letter > 'z')
-            cur_letter = 'a';
+        if (addr[2] > 'z')
+            addr[2] = 'a';
 
         (addr[1])++;
 
         if (addr[1] > n - 1)
-            addr[1] = 2;
+            addr[1] = 3;
 
         temp = semop(id_sem, after_putting_in_buf, 2);
         if (temp == -1)
@@ -99,7 +98,7 @@ int action_consumer(int num_cn, int cur_id, int n, char* addr)
         addr[0]++;
 
         if (addr[0] > n - 1)
-            addr[0] = 2;
+            addr[0] = 3;
 
         temp = semop(cur_id, after_taking_from_buf, 2);
         if (temp == -1)
@@ -121,7 +120,7 @@ int main()
     int se, sf, sb, res, status, temp_id1, temp_id2;
     pid_t producers[NUM_PR], consumers[NUM_PR];
 
-    int id_shm = shmget(IPC_PRIVATE, (N + 2) * sizeof(char), IPC_CREAT | perms);
+    int id_shm = shmget(IPC_PRIVATE, (N + 3) * sizeof(char), IPC_CREAT | perms);
     if (id_shm == -1)
     {
         perror("shmget error");
@@ -135,8 +134,9 @@ int main()
         exit(2);
     }
 
-    addr[0] = (char)2;
-    addr[1] = (char)2;
+    addr[0] = (char)3;
+    addr[1] = (char)3;
+    addr[2] = 'a';
 
     int id_sem = semget(IPC_PRIVATE, 3, IPC_CREAT | perms);
     if (id_sem == -1)
@@ -166,7 +166,7 @@ int main()
 
         if (producers[i] == 0)
         {
-            res = action_producer(i, id_sem, N + 2, addr);
+            res = action_producer(i, id_sem, N + 3, addr);
             if (res)
                 exit(res);
         }
@@ -182,7 +182,7 @@ int main()
 
         if (consumers[i] == 0)
         {
-            res = action_consumer(i, id_sem, N + 2, addr);
+            res = action_consumer(i, id_sem, N + 3, addr);
             if (res)
                 exit(res);
         }
