@@ -22,7 +22,7 @@ struct sembuf can_write_act[3] =
 {
     { SAR, 0, SEM_UNDO }, 
     { SAW, 0, SEM_UNDO },
-    { SAW, 1, SEM_UNDO }
+    { SWW, 1, SEM_UNDO }
 };
 
 struct sembuf start_write_act[2] = 
@@ -40,7 +40,7 @@ struct sembuf can_read_act[3] =
 {
     { SAW, 0, SEM_UNDO }, 
     { SAR, 0, SEM_UNDO },
-    { SAR, 1, SEM_UNDO }
+    { SWR, 1, SEM_UNDO }
 };
 
 struct sembuf start_read_act[2] = 
@@ -62,14 +62,14 @@ size_t get_len(struct sembuf arr[])
 
 void start_write(int id_sem)
 {
-    int temp = semop(id_sem, can_write_act, get_len(can_write_act));
+    int temp = semop(id_sem, can_write_act, 3);
     if (temp == -1)
     {
         perror("semop error");
         exit(6);
     }
 	
-    temp = semop(id_sem, start_write_act, get_len(start_write_act));
+    temp = semop(id_sem, start_write_act, 2);
     if (temp == -1)
     {
         perror("semop error");
@@ -79,7 +79,7 @@ void start_write(int id_sem)
 
 void stop_write(int id_sem)
 {
-    int temp = semop(id_sem, stop_write_act, get_len(stop_write_act));
+    int temp = semop(id_sem, stop_write_act, 1);
     if (temp == -1)
     {
         perror("semop error");
@@ -89,14 +89,14 @@ void stop_write(int id_sem)
 
 void start_read(int id_sem)
 {
-    int temp = semop(id_sem, can_read_act, get_len(can_read_act));
+    int temp = semop(id_sem, can_read_act, 3);
     if (temp == -1)
     {
         perror("semop error");
         exit(6);
     }
 	
-    temp = semop(id_sem, start_read_act, get_len(start_read_act));
+    temp = semop(id_sem, start_read_act, 2);
     if (temp == -1)
     {
         perror("semop error");
@@ -106,7 +106,7 @@ void start_read(int id_sem)
 
 void stop_read(int id_sem)
 {
-    int temp = semop(id_sem, stop_read_act, get_len(stop_read_act));
+    int temp = semop(id_sem, stop_read_act, 1);
     if (temp == -1)
     {
         perror("semop error");
