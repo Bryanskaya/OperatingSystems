@@ -28,7 +28,7 @@ void start_write()
     InterlockedIncrement(&waiting_writers);
 
     if (active_readers > 0 || active_writer)
-        if (WaitForSingleObject(can_write, INFINITE) == WAIT_TIMEOUT)
+        if (WaitForSingleObject(can_write, INFINITE) == WAIT_FAILED)
         {
             perror("WaitForSingleObject error\n");
             exit(4);
@@ -44,9 +44,9 @@ void stop_write()
     active_writer = FALSE;
 
     if (waiting_readers > 0)
-        PulseEvent(can_read);
-    else
-        PulseEvent(can_write);
+        SetEvent(can_read);
+    else if (waiting_writers)
+        SetEvent(can_write);
 }
 
 void start_read()
@@ -54,23 +54,29 @@ void start_read()
     InterlockedIncrement(&waiting_readers);
 
     if (active_writer || waiting_writers > 0)
-        if (WaitForSingleObject(can_read, INFINITE) == WAIT_TIMEOUT)
+    {
+        if (WaitForSingleObject(can_read, INFINITE) == WAIT_FAILED)
         {
             perror("WaitForSingleObject error\n");
             exit(4);
         }
+        else if (waiting_readers == 1)
+            ResetEvent(can_read);
+    }
 
     InterlockedDecrement(&waiting_readers);
 
     InterlockedIncrement(&active_readers);
+
+
 }
 
 void stop_read()
 {
     InterlockedDecrement(&active_readers);
 
-    if (active_readers == 0)
-        PulseEvent(can_write);
+    if (active_readers == 0 && waiting_writers)
+        SetEvent(can_write);
 }
 
 DWORD WINAPI action_writer()
@@ -84,21 +90,20 @@ DWORD WINAPI action_writer()
     {
         start_write();
 
-        if (WaitForSingleObject(mtx, INFINITE) == WAIT_TIMEOUT)
+        if (WaitForSingleObject(mtx, INFINITE) == WAIT_FAILED)
         {
             perror("WaitForSingleObject error\n");
             exit(4);
         }
 
         shr_var++;
+        printf(">>> WRITER %ld: \twrote %d\n", cur_id, shr_var);
 
         if (!ReleaseMutex(mtx))
         {
             perror("ReleaseMutex error\n");
             exit(5);
         }
-
-        printf(">>> WRITER %ld: \twrote %d\n", cur_id, shr_var);
 
         stop_write();
 
@@ -110,7 +115,6 @@ DWORD WINAPI action_writer()
 
 DWORD WINAPI action_reader()
 {
-    int temp;
     long cur_id = GetCurrentThreadId();
 
     srand(time(NULL) + cur_id);
@@ -121,21 +125,19 @@ DWORD WINAPI action_reader()
     {
         start_read();
 
-        if (WaitForSingleObject(mtx, INFINITE) == WAIT_TIMEOUT)
+        if (WaitForSingleObject(mtx, INFINITE) == WAIT_FAILED)
         {
             perror("WaitForSingleObject error\n");
             exit(4);
         }
 
-        temp = shr_var;
+        printf(">>> READER %ld: \tread %d\n", cur_id, shr_var);
 
         if (!ReleaseMutex(mtx))
         {
             perror("ReleaseMutex error\n");
             exit(5);
         }
-
-        printf(">>> READER %ld: \tread %d\n", cur_id, temp);
 
         stop_read();
 
