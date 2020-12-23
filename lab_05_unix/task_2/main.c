@@ -9,56 +9,27 @@
 #include <unistd.h>
 #include <time.h>
 
-#define     SWR     0
-#define     SWW     1
-#define     SAR     2
-#define     SAW     3
+#define     SEM_WAITING_READERS     0
+#define     SEM_WAITING_WRITERS     1
+#define     SEM_ACTIVE_READERS      2
+#define     SEM_ACTIVE_WRITERS      3
 
 #define     NUM_W   3
 #define     NUM_R   7
 
 
-struct sembuf can_write_act[3] = 
-{
-    { SAR, 0, SEM_UNDO }, 
-    { SAW, 0, SEM_UNDO },
-    { SWW, 1, SEM_UNDO }
-};
+struct sembuf can_write_act[3] = { { SEM_ACTIVE_READERS, 0, SEM_UNDO }, { SEM_ACTIVE_WRITERS, 0, SEM_UNDO }, { SEM_WAITING_WRITERS, 1, SEM_UNDO } };
 
-struct sembuf start_write_act[2] = 
-{
-    { SAW, 1, SEM_UNDO },
-    { SWW, -1, SEM_UNDO }
-};
+struct sembuf start_write_act[2] = { { SEM_ACTIVE_WRITERS, 1, SEM_UNDO }, { SEM_WAITING_WRITERS, -1, SEM_UNDO } };
 
-struct sembuf stop_write_act[1] = 
-{
-    { SAW, -1, SEM_UNDO }
-};
+struct sembuf stop_write_act[1] = { { SEM_ACTIVE_WRITERS, -1, SEM_UNDO } };
 
-struct sembuf can_read_act[3] = 
-{
-    { SAW, 0, SEM_UNDO }, 
-    { SAR, 0, SEM_UNDO },
-    { SWR, 1, SEM_UNDO }
-};
+struct sembuf can_read_act[3] = { { SEM_ACTIVE_WRITERS, 0, SEM_UNDO }, { SEM_ACTIVE_READERS, 0, SEM_UNDO }, { SEM_WAITING_READERS, 1, SEM_UNDO } };
 
-struct sembuf start_read_act[2] = 
-{
-    { SAR, 1, SEM_UNDO },
-    { SWR, -1, SEM_UNDO }
-};
+struct sembuf start_read_act[2] = { { SEM_ACTIVE_READERS, 1, SEM_UNDO }, { SEM_WAITING_READERS, -1, SEM_UNDO } };
 
-struct sembuf stop_read_act[1] = 
-{
-    { SAR, -1, SEM_UNDO }
-};
+struct sembuf stop_read_act[1] = { { SEM_ACTIVE_READERS, -1, SEM_UNDO } };
 
-
-size_t get_len(struct sembuf arr[])
-{
-    return sizeof(*arr) / sizeof((arr)[0]);
-}
 
 void start_write(int id_sem)
 {
@@ -163,10 +134,10 @@ int main()
         exit(1);
     }
 
-    swr = semctl(id_sem, SWR, SETVAL, 0);
-    sww = semctl(id_sem, SWW, SETVAL, 0);
-    sar = semctl(id_sem, SAR, SETVAL, 0);
-    saw = semctl(id_sem, SAW, SETVAL, 0);
+    swr = semctl(id_sem, SEM_WAITING_READERS, SETVAL, 0);
+    sww = semctl(id_sem, SEM_WAITING_WRITERS, SETVAL, 0);
+    sar = semctl(id_sem, SEM_ACTIVE_READERS, SETVAL, 0);
+    saw = semctl(id_sem, SEM_ACTIVE_WRITERS, SETVAL, 0);
 
     if (swr == -1 || sww == -1 || sar == -1 || saw == -1)
     {
