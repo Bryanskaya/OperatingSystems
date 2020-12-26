@@ -31,13 +31,9 @@ struct sembuf start_read_act[2] = { { SEM_ACTIVE_READERS, 1, SEM_UNDO }, { SEM_W
 struct sembuf stop_read_act[1] = { { SEM_ACTIVE_READERS, -1, SEM_UNDO } };*/
 
 
-struct sembuf wait_write_act[1] = 
+struct sembuf start_write_act[5] = 
 {
-    { SEM_WAITING_WRITERS, 1, SEM_UNDO }
-};
-
-struct sembuf start_write_act[4] = 
-{
+    { SEM_WAITING_WRITERS, 1, SEM_UNDO },
     { SEM_ACTIVE_WRITERS, 0, SEM_UNDO }, 
     { SEM_ACTIVE_READERS, 0, SEM_UNDO }, 
     { SEM_ACTIVE_WRITERS, 1, SEM_UNDO }, 
@@ -49,12 +45,9 @@ struct sembuf stop_write_act[1] =
     { SEM_ACTIVE_WRITERS, -1, SEM_UNDO }
 };
 
-struct sembuf wait_read_act[1] = {
-    { SEM_WAITING_READERS, 1, SEM_UNDO }
-};
-
-struct sembuf start_read_act[4] = 
+struct sembuf start_read_act[5] = 
 { 
+    { SEM_WAITING_READERS, 1, SEM_UNDO },
     { SEM_ACTIVE_WRITERS, 0, SEM_UNDO }, 
     { SEM_WAITING_WRITERS, 0, SEM_UNDO }, 
     { SEM_ACTIVE_READERS, 1, SEM_UNDO }, 
@@ -67,15 +60,8 @@ struct sembuf stop_read_act[1] =
 };
 
 void start_write(int id_sem)
-{
-    int temp = semop(id_sem, wait_write_act, 1);
-    if (temp == -1)
-    {
-        perror("semop error");
-        exit(6);
-    }
-	
-    temp = semop(id_sem, start_write_act, 4);
+{	
+    int temp = semop(id_sem, start_write_act, 5);
     if (temp == -1)
     {
         perror("semop error");
@@ -94,15 +80,8 @@ void stop_write(int id_sem)
 }
 
 void start_read(int id_sem)
-{
-    int temp = semop(id_sem, wait_read_act, 1);
-    if (temp == -1)
-    {
-        perror("semop error");
-        exit(6);
-    }
-	
-    temp = semop(id_sem, start_read_act, 4);
+{	
+    int temp = semop(id_sem, start_read_act, 5);
     if (temp == -1)
     {
         perror("semop error");
