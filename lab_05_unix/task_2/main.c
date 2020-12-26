@@ -31,28 +31,51 @@ struct sembuf start_read_act[2] = { { SEM_ACTIVE_READERS, 1, SEM_UNDO }, { SEM_W
 struct sembuf stop_read_act[1] = { { SEM_ACTIVE_READERS, -1, SEM_UNDO } };*/
 
 
-struct sembuf wait_write_act[1] = { { SEM_WAITING_WRITERS, 1, SEM_UNDO } };
+struct sembuf wait_write_act[1] = 
+{
+    { SEM_WAITING_WRITERS, 1, SEM_UNDO }
+};
 
-struct sembuf start_write_act[4] = { { SEM_ACTIVE_WRITERS, 0, SEM_UNDO }, { SEM_ACTIVE_READERS, 0, SEM_UNDO }, { SEM_ACTIVE_WRITERS, 1, SEM_UNDO }, { SEM_WAITING_WRITERS, -1, SEM_UNDO } };
+struct sembuf start_write_act[4] = 
+{
+    { SEM_ACTIVE_WRITERS, 0, SEM_UNDO }, 
+    { SEM_ACTIVE_READERS, 0, SEM_UNDO }, 
+    { SEM_ACTIVE_WRITERS, 1, SEM_UNDO }, 
+    { SEM_WAITING_WRITERS, -1, SEM_UNDO } 
+};
 
-struct sembuf stop_write_act[1] = { { SEM_ACTIVE_WRITERS, -1, SEM_UNDO } };
+struct sembuf stop_write_act[1] = 
+{ 
+    { SEM_ACTIVE_WRITERS, -1, SEM_UNDO }
+};
 
-struct sembuf wait_read_act[1] = { { SEM_WAITING_READERS, 1, SEM_UNDO } };
+struct sembuf wait_read_act[1] = {
+    { SEM_WAITING_READERS, 1, SEM_UNDO }
+};
 
-struct sembuf start_read_act[4] = { { SEM_ACTIVE_WRITERS, 0, SEM_UNDO }, { SEM_WAITING_WRITERS, 0, SEM_UNDO }, { SEM_ACTIVE_READERS, 1, SEM_UNDO }, { SEM_WAITING_READERS, -1, SEM_UNDO } };
+struct sembuf start_read_act[4] = 
+{ 
+    { SEM_ACTIVE_WRITERS, 0, SEM_UNDO }, 
+    { SEM_WAITING_WRITERS, 0, SEM_UNDO }, 
+    { SEM_ACTIVE_READERS, 1, SEM_UNDO }, 
+    { SEM_WAITING_READERS, -1, SEM_UNDO } 
+};
 
-struct sembuf stop_read_act[1] = { { SEM_ACTIVE_READERS, -1, SEM_UNDO } };
+struct sembuf stop_read_act[1] = 
+{ 
+    { SEM_ACTIVE_READERS, -1, SEM_UNDO }
+};
 
 void start_write(int id_sem)
 {
-    int temp = semop(id_sem, wait_write_act, 3);
+    int temp = semop(id_sem, wait_write_act, 1);
     if (temp == -1)
     {
         perror("semop error");
         exit(6);
     }
 	
-    temp = semop(id_sem, start_write_act, 2);
+    temp = semop(id_sem, start_write_act, 4);
     if (temp == -1)
     {
         perror("semop error");
@@ -127,7 +150,7 @@ void action_reader(int cur_id, int id_sem, int* addr)
 
         stop_read(id_sem);
 
-        sleep(rand() % 3 + 1);
+        sleep(rand() % 2 + 1);
     }
 }
 
