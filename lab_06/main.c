@@ -64,11 +64,21 @@ void start_read()
             ResetEvent(can_read);
     }
 
+    if (WaitForSingleObject(mtx, INFINITE) == WAIT_FAILED)
+    {
+        perror("WaitForSingleObject error\n");
+        exit(4);
+    }
+
     InterlockedDecrement(&waiting_readers);
 
     InterlockedIncrement(&active_readers);
 
-
+    if (!ReleaseMutex(mtx))
+    {
+        perror("ReleaseMutex error\n");
+        exit(5);
+    }
 }
 
 void stop_read()
@@ -90,20 +100,20 @@ DWORD WINAPI action_writer()
     {
         start_write();
 
-        if (WaitForSingleObject(mtx, INFINITE) == WAIT_FAILED)
+        /*if (WaitForSingleObject(mtx, INFINITE) == WAIT_FAILED)
         {
             perror("WaitForSingleObject error\n");
             exit(4);
-        }
+        }*/
 
         shr_var++;
         printf(">>> WRITER %ld: \twrote %d\n", cur_id, shr_var);
 
-        if (!ReleaseMutex(mtx))
+        /*if (!ReleaseMutex(mtx))
         {
             perror("ReleaseMutex error\n");
             exit(5);
-        }
+        }*/
 
         stop_write();
 
@@ -125,19 +135,19 @@ DWORD WINAPI action_reader()
     {
         start_read();
 
-        if (WaitForSingleObject(mtx, INFINITE) == WAIT_FAILED)
+        /*if (WaitForSingleObject(mtx, INFINITE) == WAIT_FAILED)
         {
             perror("WaitForSingleObject error\n");
             exit(4);
-        }
+        }*/
 
         printf(">>> READER %ld: \tread %d\n", cur_id, shr_var);
 
-        if (!ReleaseMutex(mtx))
+        /*if (!ReleaseMutex(mtx))
         {
             perror("ReleaseMutex error\n");
             exit(5);
-        }
+        }*/
 
         stop_read();
 
