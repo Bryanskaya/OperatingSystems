@@ -17,8 +17,9 @@ HANDLE writers[NUM_WRITERS];
 HANDLE readers[NUM_READERS];
 
 BOOL active_writer = FALSE;
-volatile long active_readers = 0;
-volatile long waiting_readers = 0, waiting_writers = 0;
+
+long active_readers = 0;
+long waiting_readers = 0, waiting_writers = 0;
 
 int shr_var = -1;
 
@@ -27,12 +28,8 @@ void start_write()
 {
     InterlockedIncrement(&waiting_writers);
 
-    if (active_readers > 0 || active_writer)
-        if (WaitForSingleObject(can_write, INFINITE) == WAIT_FAILED)
-        {
-            perror("WaitForSingleObject error\n");
-            exit(4);
-        }
+    if (active_readers || active_writer)
+        WaitForSingleObject(can_write, INFINITE);
 
     InterlockedDecrement(&waiting_writers);
 
@@ -43,7 +40,7 @@ void stop_write()
 {
     active_writer = FALSE;
 
-    if (waiting_readers > 0)
+    if (waiting_readers)
         SetEvent(can_read);
     else if (waiting_writers)
         SetEvent(can_write);
@@ -53,30 +50,16 @@ void start_read()
 {
     InterlockedIncrement(&waiting_readers);
 
-    if (active_writer || waiting_writers > 0)
-    {
-        if (WaitForSingleObject(can_read, INFINITE) == WAIT_FAILED)
-        {
-            perror("WaitForSingleObject error\n");
-            exit(4);
-        }
-    }
+    if (active_writer || waiting_writers)
+        WaitForSingleObject(can_read, INFINITE);
 
-    if (WaitForSingleObject(mtx, INFINITE) == WAIT_FAILED)
-    {
-        perror("WaitForSingleObject error\n");
-        exit(4);
-    }
+    WaitForSingleObject(mtx, INFINITE);
 
     InterlockedDecrement(&waiting_readers);
 
     InterlockedIncrement(&active_readers);
 
-    if (!ReleaseMutex(mtx))
-    {
-        perror("ReleaseMutex error\n");
-        exit(5);
-    }
+    ReleaseMutex(mtx);
 
     if (waiting_readers)
         SetEvent(can_read);
