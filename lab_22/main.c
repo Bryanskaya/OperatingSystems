@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <sys/stat.h>
+#include <sys/types.h>
 
 
 #define FTW_F   1       // Файл, не являющийся каталогом
@@ -19,7 +21,7 @@ static char *fullpath; // Полный путь к каждому из файл�
 typedef int Myfunc(const char *,const struct stat *, int);
 
 
-static int dopath(Myfunc *func)
+static int dopath(const char *filename, Myfunc *func, int n)
 {
     struct stat     statbuf;
     struct dirent   *dirp;
@@ -37,44 +39,50 @@ static int dopath(Myfunc *func)
     жёсткая - другое название файла, по прошлому семетру символьная - путь к файлу
     любой пользователь может создавать символическую ссылку на каталог
 */
-    if (lstat(fullpath, &statbuf) < 0)
-        return(func(fullpath, &statbuf, FTW_NS));
+    if (lstat(filename, &statbuf) < 0)
+        return(func(filename, &statbuf, FTW_NS));
+
+    for (int i = 0; i < n; i++)
+        printf("______");
 
     if (S_ISDIR(statbuf.st_mode) == 0)  // S_ISDIR - каталог  //st_mode - хранит тип файла (биты прав доступа к файлу, 9 бит на 3 категории)
-        return(func(fullpath, &statbuf, FTW_F));
+        return(func(filename, &statbuf, FTW_F));
 
 
     // Это каталог, сначала вызов func(), а затем обработка всех файлов в этом каталоге
-    if (ret = func(fullpath, &statbuf, FTW_D))
+    if (ret = func(filename, &statbuf, FTW_D))
         return(ret);
 
-    ptr = fullpath + strlen(fullpath); // установить указатель в конец fullpath //нет
+    /*ptr = filename + strlen(filename); // установить указатель в конец fullpath //нет
     *ptr++ = '/';
-    *ptr = 0;
+    *ptr = 0;*/
 
     /* opendir - возвращает указатель в случае успеха (открывает поток каталога и возвращает указатель на этот поток, 
        поток устанавливается на первой записи в каталоге)*/
-    if ((dp = opendir(fullpath)) == NULL)  // каталог недоступен
-        return(func(fullpath, &statbuf, FTW_DNR));
+    if ((dp = opendir(filename)) == NULL)  // каталог недоступен
+        return(func(filename, &statbuf, FTW_DNR));
 
+    chdir(filename);
     /* readdir - считывает очередную запись, возвращает указатель на структуру dirent
        или пустой указатель, если всё прочитано*/
-    while (dirp = readdir(dp))
+    while (dirp = readdir(dp)) //*
     {
         if (strcmp(dirp->d_name, ".") == 0 ||       /* d_name - имя файла*/
             strcmp(dirp->d_name, "..") == 0)        /* . - текущий каталог  .. - родительская директория*/
             continue;       // пропустить каталоги . и ..
         
-        strcpy(ptr, dirp->d_name);
+        //strcpy(ptr, dirp->d_name);
 
-        if ((ret = dopath(func)))   // рекурсия, выход по ошибке
+        if ((ret = dopath(dirp->d_name, func, n + 1)))   // рекурсия, выход по ошибке
             break;
     }
 
-    ptr[-1] = 0; // стереть часть строки от слэша и до конца
+    chdir("..");
+
+    //ptr[-1] = 0; // стереть часть строки от слэша и до конца
 
     if (closedir(dp) < 0) // (закрывает поток, связанный с каталогом)
-        printf("ERROR: imposiible to close catalog %s", fullpath);
+        printf("ERROR: imposiible to close catalog %s", filename);
 
     return(ret);
 }
@@ -82,9 +90,9 @@ static int dopath(Myfunc *func)
 
 static int myftw(char *pathname, Myfunc *func)
 {
-    // в учебнике происходит выделение памяти, но в репах его нет нигде
+    // в учебнике происходит выделение памяти
 
-    return (dopath(func)); 
+    return (dopath(pathname, func, 0)); 
 }
 
 
@@ -97,10 +105,10 @@ static int showFiles(const char *pathname, const struct stat *statptr, int type)
         printf("ERROR: mistake in call func lstat for %s\n", pathname);
         break;
     case FTW_F:
-        printf("__ %s\n", pathname);
+        printf(" %s\n", pathname);
         break;
     case FTW_D:
-        printf("__ %s/\n", pathname);
+        printf(" %s/\n", pathname);
         break;
     case FTW_DNR:
         printf("ERROR: access to catalog %s is closed\n", pathname);
