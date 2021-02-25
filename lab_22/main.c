@@ -18,16 +18,16 @@
 
 static char *fullpath; // Полный путь к каждому из файлов
 
-typedef int Myfunc(const char *,const struct stat *, int);
+// typedef int Myfunc(const char *,const struct stat *, int);
+typedef int Myfunc(const char *, int);
 
 
-static int dopath(const char *filename, Myfunc *func, int n)
+static int dopath(const char *filename, Myfunc *func, int n) //filename - символьная ссылка на текущий файл
 {
-    struct stat     statbuf;
-    struct dirent   *dirp;
-    DIR             *dp;
-    int             ret;
-    char            *ptr; // нет
+    struct stat     statbuf;    // структура с информацией о файле, тип, режим доступа, номер индексного узла и т.д.
+    struct dirent   *dirp;      // в структуре dirent содержится номер индексного узла и имя файла
+    DIR             *dp;        // структура, хранит информацию о каталоге, похожа на структуру FILE 
+    int             ret;    
 
 // lstat - работает как stat, только если 1ый аргумент - символическая ссылка, 
 // то она возвращает сведения о самой ссылке, а не о файле, на который она ссылается
@@ -35,51 +35,42 @@ static int dopath(const char *filename, Myfunc *func, int n)
 // в ней указаны права доступа, тип файла, количество ссылок, иеднтификатор пользователя и т.д.
 // с помощью lstat можно увидеть символические ссылки
 /*
-    Символическая сслыка (возможно по Рязановой символьная) - косвенная ссылка на файл
+    Символическая сслыка - косвенная ссылка на файл
     жёсткая - другое название файла, по прошлому семетру символьная - путь к файлу
     любой пользователь может создавать символическую ссылку на каталог
 */
     if (lstat(filename, &statbuf) < 0)
-        return(func(filename, &statbuf, FTW_NS));
+        return(func(filename, FTW_NS));
 
     for (int i = 0; i < n; i++)
         printf("______");
 
-    if (S_ISDIR(statbuf.st_mode) == 0)  // S_ISDIR - каталог  //st_mode - хранит тип файла (биты прав доступа к файлу, 9 бит на 3 категории)
-        return(func(filename, &statbuf, FTW_F));
+    if (S_ISDIR(statbuf.st_mode) == 0)  // S_ISDIR - макрос, каталог  //st_mode - хранит тип файла (биты прав доступа к файлу, 9 бит на 3 категории)
+        return(func(filename, FTW_F));
 
 
     // Это каталог, сначала вызов func(), а затем обработка всех файлов в этом каталоге
-    if (ret = func(filename, &statbuf, FTW_D))
-        return(ret);
+    func(filename, FTW_D);
 
-    /*ptr = filename + strlen(filename); // установить указатель в конец fullpath //нет
-    *ptr++ = '/';
-    *ptr = 0;*/
-
-    /* opendir - возвращает указатель в случае успеха (открывает поток каталога и возвращает указатель на этот поток, 
+    /* opendir - инициализирует структуру dir, возвращает указатель в случае успеха (открывает поток каталога и возвращает указатель на этот поток, 
        поток устанавливается на первой записи в каталоге)*/
     if ((dp = opendir(filename)) == NULL)  // каталог недоступен
-        return(func(filename, &statbuf, FTW_DNR));
+        return(func(filename, FTW_DNR));
 
-    chdir(filename);
-    /* readdir - считывает очередную запись, возвращает указатель на структуру dirent
+    chdir(filename); // изменение текущего каталога
+    /* readdir - считывает очередную запись, возвращает указатель на структуру dirent (на очередную запись)
        или пустой указатель, если всё прочитано*/
     while (dirp = readdir(dp)) //*
     {
         if (strcmp(dirp->d_name, ".") == 0 ||       /* d_name - имя файла*/
             strcmp(dirp->d_name, "..") == 0)        /* . - текущий каталог  .. - родительская директория*/
             continue;       // пропустить каталоги . и ..
-        
-        //strcpy(ptr, dirp->d_name);
 
         if ((ret = dopath(dirp->d_name, func, n + 1)))   // рекурсия, выход по ошибке
             break;
     }
 
     chdir("..");
-
-    //ptr[-1] = 0; // стереть часть строки от слэша и до конца
 
     if (closedir(dp) < 0) // (закрывает поток, связанный с каталогом)
         printf("ERROR: imposiible to close catalog %s", filename);
@@ -88,17 +79,9 @@ static int dopath(const char *filename, Myfunc *func, int n)
 }
 
 
-static int myftw(char *pathname, Myfunc *func)
+
+static int showFiles(const char *pathname, int type)
 {
-    // в учебнике происходит выделение памяти
-
-    return (dopath(pathname, func, 0)); 
-}
-
-
-static int showFiles(const char *pathname, const struct stat *statptr, int type)
-{
-    // подсчет файлов, нам не надо
     switch (type)
     {
     case FTW_NS:
@@ -119,7 +102,7 @@ static int showFiles(const char *pathname, const struct stat *statptr, int type)
         break;
     }
 
-    return(0);
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -128,11 +111,11 @@ int main(int argc, char *argv[])
 
     if (argc != 2)
     {
-        perror("ERROR: wrong number of arguments (must be one - starting dir)");
+        printf("ERROR: wrong number of arguments (must be one - starting dir)\n");
         exit(1);
     }
 
-    ret = myftw(argv[1], showFiles);
+    ret = dopath(argv[1], showFiles, 0);
     
     return ret;
 }
