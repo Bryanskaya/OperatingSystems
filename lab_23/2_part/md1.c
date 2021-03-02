@@ -1,8 +1,11 @@
 #include <linux/module.h>
+#include <linux/init.h>
 #include "md.h"
 
+MODULE_LICENSE("GPL");
 
-char *md1_data = "Hello, world!";
+
+char *md1_data = "Привет, мир!";
 
 extern char *md1_proc(void)
 {
@@ -22,15 +25,16 @@ extern char *md1_noexport(void)
 EXPORT_SYMBOL(md1_data);
 EXPORT_SYMBOL(md1_proc);
 
+
 static int __init md_init(void)
 {
-    printk("+ Module md1 start\n);
+    printk("+ Module md1 started!\n");
     return 0;
 }
 
-static int __exit md_exit(void)
+static void __exit md_exit(void)
 {
-    printk("+ Module md1 unloaded\n);
+    printk("+ Module md1 unloaded\n");
 }
 
 module_init(md_init);
