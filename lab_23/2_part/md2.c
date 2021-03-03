@@ -11,9 +11,6 @@ static int __init md_init(void)
     printk("+ Module md2 started!\n"); 
     printk("+ Data string exported from md1 : %s\n", md1_data); 
     printk("+ String returned md1_proc() is : %s\n", md1_proc()); 
-
-
-    printk("+ String returned md1_noexport() is : %s\n", md1_local()); 
     
     return 0; 
 } 
