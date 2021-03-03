@@ -1,2 +1,2 @@
-# Материал по нему  
+# Материал по Цилюрику  
 https://www.ibm.com/developerworks/ru/library/l-linux_kernel_01/index.html
