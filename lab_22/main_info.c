@@ -16,15 +16,13 @@
 #define FTW_NS  4       // Файл, информацию о котором невозможно получить с помощью stat
 
 
-static char *fullpath; // Полный путь к каждому из файлов
-
-// typedef int Myfunc(const char *,const struct stat *, int);
 typedef int Myfunc(const char *, int);
 
 
 static int dopath(const char *filename, Myfunc *func, int n) //filename - символьная ссылка на текущий файл
 {
-    struct stat     statbuf;    // структура с информацией о файле, тип, режим доступа, номер индексного узла и т.д.
+    struct stat     statbuf;    // структура с информацией о файле, тип, режим доступа, номер индексного узла, количество ссылок, id пользователя, 
+                                // время последнего обращения, изменения и т.д.
     struct dirent   *dirp;      // в структуре dirent содержится номер индексного узла и имя файла
     DIR             *dp;        // структура, хранит информацию о каталоге, похожа на структуру FILE 
     int             ret;    
@@ -57,7 +55,7 @@ static int dopath(const char *filename, Myfunc *func, int n) //filename - сим
     if ((dp = opendir(filename)) == NULL)  // каталог недоступен
         return(func(filename, FTW_DNR));
 
-    chdir(filename); // изменение текущего каталога
+    chdir(filename); // изменение текущего каталога, передача короткого имени
     /* readdir - считывает очередную запись, возвращает указатель на структуру dirent (на очередную запись)
        или пустой указатель, если всё прочитано*/
     while (dirp = readdir(dp)) //*
