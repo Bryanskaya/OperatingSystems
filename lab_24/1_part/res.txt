@@ -26,7 +26,7 @@ USER=ekaterina
 DESKTOP_SESSION=ubuntu
 QT4_IM_MODULE=xim
 TEXTDOMAINDIR=/usr/share/locale/
-GNOME_TERMINAL_SCREEN=/org/gnome/Terminal/screen/c05cf61_81b0_4ef8_8fff_ed08c8336985
+GNOME_TERMINAL_SCREEN=/org/gnome/Terminal/screen/a04aaa1_6e7b_43d0_9676_f2e412f0be57
 DEFAULTS_PATH=/usr/share/gconf/ubuntu.default.path
 PWD=/home/ekaterina/OS/OperatingSystems/lab_24/1_part
 HOME=/home/ekaterina
@@ -69,37 +69,37 @@ SESSION_MANAGER=local/ekaterina-HP-470-G7-Notebook-PC:@/tmp/.ICE-unix/3143,unix/
 LESSOPEN=| /usr/bin/lesspipe %s
 GTK_IM_MODULE=ibus
 LC_TIME=ru_RU.UTF-8
-OLDPWD=/home/ekaterina
+OLDPWD=/home/ekaterina/OS/OperatingSystems/lab_24
 _=./main.o
 
 ======================= exe ========================
 /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
 
 ======================== fd ========================
-0	/dev/pts/0
-1	/dev/pts/0
-2	/dev/pts/0
-3	/proc/27344/fd
+0	/dev/pts/1
+1	/dev/pts/1
+2	/dev/pts/1
+3	/proc/27770/fd
 4	/home/ekaterina/OS/OperatingSystems/lab_24/1_part/res.txt
 
 ======================= maps =======================
-55d3faf5d000-55d3faf60000 r-xp 00000000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
-55d3fb15f000-55d3fb160000 r--p 00002000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/man.o
-55d3fb160000-55d3fb161000 rw-p 00003000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
-55d3fbe3f000-55d3fbe60000 rw-p 00000000 00:00 0                          [heap]
-7f07f1eba000-7f07f20a1000 r-xp 00000000 0:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
-7f07f20a1000-7f07f22a1000 ---p 001e7000 08:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
-7f07f22a1000-7f07f22a5000 r--p 001e7000 08:03 1316125                    /lib/x8664-linux-gnu/libc-2.27.so
-7f07f22a5000-7f07f22a7000 rw-p 001eb000 08:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
-7f07f22a7000-7f07f22ab000 rw-p 00000000 00:00 0 
-7f07f22ab000-7f07f22d4000 r-xp 00000000 08:03 1316116                   /lib/x86_64-linux-gnu/ld-2.27.so
-7f07f24c0000-7f07f24c2000 rw-p 00000000 00:00 0 
-7f07f24d4000-7f07f24d5000 r--p 00029000 08:03 1316116                    /lib/x86_64-linux-gnu/ld-2.27.so
-7f07f24d5000-7f07f24d6000 rw-p 0002a000 08:03 1316116                   /lib/x86_64-linux-gnu/ld-2.27.so
-7f07f24d6000-7f07f24d7000 rw-p 00000000 00:00 0 
-7ffd999b6000-7ffd999d7000 rw-p 00000000 00:00 0                          [stack]
-7ffd999eb000-7ffd999ee000 r--p 00000000 00:00 0                          [vvar]
-7ffd999e000-7ffd999ef000 r-xp 00000000 00:00 0                          [vdso]
+55a33e1e1000-55a33e1e4000 r-xp 00000000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
+55a33e3e3000-55a33e3e4000 r--p 00002000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/man.o
+55a33e3e4000-55a33e3e5000 rw-p 00003000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
+55a33ea18000-55a33ea39000 rw-p 00000000 00:00 0                          [heap]
+7f81a2360000-7f81a2547000 r-xp 00000000 0:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
+7f81a2547000-7f81a2747000 ---p 001e7000 08:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
+7f81a2747000-7f81a274b000 r--p 001e7000 08:03 1316125                    /lib/x8664-linux-gnu/libc-2.27.so
+7f81a274b000-7f81a274d000 rw-p 001eb000 08:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
+7f81a274d000-7f81a2751000 rw-p 00000000 00:00 0 
+7f81a2751000-7f81a277a000 r-xp 00000000 08:03 1316116                   /lib/x86_64-linux-gnu/ld-2.27.so
+7f81a2966000-7f81a2968000 rw-p 00000000 00:00 0 
+7f81a297a000-7f81a297b000 r--p 00029000 08:03 1316116                    /lib/x86_64-linux-gnu/ld-2.27.so
+7f81a297b000-7f81a297c000 rw-p 0002a000 08:03 1316116                   /lib/x86_64-linux-gnu/ld-2.27.so
+7f81a297c000-7f81a297d000 rw-p 00000000 00:00 0 
+7ffe0ec6f000-7ffe0ec90000 rw-p 00000000 00:00 0                          [stack]
+7ffe0edaf000-7ffe0edb2000 r--p 00000000 00:00 0                          [vvar]
+7ffe0ed2000-7ffe0edb3000 r-xp 00000000 00:00 0                          [vdso]
 ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]
 
 ======================= mem ========================
@@ -112,6 +112,6 @@ ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsysca
 
 
 ======================= statm ======================
-1130 193 177 3 0 77 0
+1130 203 187 3 0 77 0
 
 
