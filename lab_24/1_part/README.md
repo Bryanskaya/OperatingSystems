@@ -50,7 +50,7 @@
       5585518e6000-5585518e7000 r-xp 00000000 08:03 2885923   /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
       558551ae6000-558551ae7000 r--p 00000000 08:03 2885923   /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
       558551ae7000-558551ae8000 rw-p 00001000 08:03 2885923   /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
-      558552bb6000-558552bd7000 rw-p 00000000 00:00 0   [heap]
+      558552bb6000-558552bd7000 rw-p 00000000 00:00 0         [heap]
       ```
 
 
