@@ -26,12 +26,12 @@ USER=ekaterina
 DESKTOP_SESSION=ubuntu
 QT4_IM_MODULE=xim
 TEXTDOMAINDIR=/usr/share/locale/
-GNOME_TERMINAL_SCREEN=/org/gnome/Terminal/screen/a04aaa1_6e7b_43d0_9676_f2e412f0be57
+GNOME_TERMINAL_SCREEN=/org/gnome/Terminal/screen/3250be1_d325_40ca_abbe_037d97fd5671
 DEFAULTS_PATH=/usr/share/gconf/ubuntu.default.path
 PWD=/home/ekaterina/OS/OperatingSystems/lab_24/1_part
 HOME=/home/ekaterina
 TEXTDOMAIN=im-config
-SSH_AGENT_PID=3221
+SSH_AGENT_PID=1665
 QT_ACCESSIBILITY=1
 XDG_SESSION_TYPE=x11
 XDG_DATA_DIRS/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
@@ -50,7 +50,7 @@ XMODIFIERS=@im=ibus
 IM_CONFIG_PHASE=2
 XDG_CURRENT_DESKTOP=ubuntu:GNOME
 GPG_AGENT_INFO=/run/user/1000/gnupg/S.gpg-agent:0:1
-GNOME_TERMINAL_SERVICE=:1.806
+GNOME_TERMINAL_SERVICE=:1.102
 SHLVL=1
 XDG_SEAT=seat0
 LANGUAGE=ru:en_CA:en
@@ -65,41 +65,41 @@ XDG_CONFIG_DIRS=/etc/xdg/xdg-ubuntu:/etc/xdg
 PAH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 LC_IDENTIFICATION=ru_RU.UTF-8
 GJS_DEBUG_TOPICS=JS ERROR;JS LOG
-SESSION_MANAGER=local/ekaterina-HP-470-G7-Notebook-PC:@/tmp/.ICE-unix/3143,unix/ekaterina-H-470-G7-Notebook-PC:/tmp/.ICE-unix/3143
+SESSION_MANAGER=local/ekaterina-HP-470-G7-Notebook-PC:@/tmp/.ICE-unix/1587,unix/ekaterina-H-470-G7-Notebook-PC:/tmp/.ICE-unix/1587
 LESSOPEN=| /usr/bin/lesspipe %s
 GTK_IM_MODULE=ibus
 LC_TIME=ru_RU.UTF-8
-OLDPWD=/home/ekaterina/OS/OperatingSystems/lab_24
+OLDPWD=/home/ekaterina
 _=./main.o
 
 ======================= exe ========================
 /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
 
 ======================== fd ========================
-0	/dev/pts/1
-1	/dev/pts/1
-2	/dev/pts/1
-3	/proc/27770/fd
+0	/dev/pts/0
+1	/dev/pts/0
+2	/dev/pts/0
+3	/proc/4914/fd
 4	/home/ekaterina/OS/OperatingSystems/lab_24/1_part/res.txt
 
 ======================= maps =======================
-55a33e1e1000-55a33e1e4000 r-xp 00000000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
-55a33e3e3000-55a33e3e4000 r--p 00002000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/man.o
-55a33e3e4000-55a33e3e5000 rw-p 00003000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
-55a33ea18000-55a33ea39000 rw-p 00000000 00:00 0                          [heap]
-7f81a2360000-7f81a2547000 r-xp 00000000 0:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
-7f81a2547000-7f81a2747000 ---p 001e7000 08:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
-7f81a2747000-7f81a274b000 r--p 001e7000 08:03 1316125                    /lib/x8664-linux-gnu/libc-2.27.so
-7f81a274b000-7f81a274d000 rw-p 001eb000 08:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
-7f81a274d000-7f81a2751000 rw-p 00000000 00:00 0 
-7f81a2751000-7f81a277a000 r-xp 00000000 08:03 1316116                   /lib/x86_64-linux-gnu/ld-2.27.so
-7f81a2966000-7f81a2968000 rw-p 00000000 00:00 0 
-7f81a297a000-7f81a297b000 r--p 00029000 08:03 1316116                    /lib/x86_64-linux-gnu/ld-2.27.so
-7f81a297b000-7f81a297c000 rw-p 0002a000 08:03 1316116                   /lib/x86_64-linux-gnu/ld-2.27.so
-7f81a297c000-7f81a297d000 rw-p 00000000 00:00 0 
-7ffe0ec6f000-7ffe0ec90000 rw-p 00000000 00:00 0                          [stack]
-7ffe0edaf000-7ffe0edb2000 r--p 00000000 00:00 0                          [vvar]
-7ffe0ed2000-7ffe0edb3000 r-xp 00000000 00:00 0                          [vdso]
+55f63390a000-55f63390d000 r-xp 00000000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
+55f633b0c000-55f633b0d000 r--p 00002000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/man.o
+55f633b0d000-55f633b0e000 rw-p 00003000 08:03 2885923                    /home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
+55f634e28000-55f634e49000 rw-p 00000000 00:00 0                          [heap]
+7f846ce39000-7f846d020000 r-xp 00000000 0:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
+7f846d020000-7f846d220000 ---p 001e7000 08:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
+7f846d220000-7f846d224000 r--p 001e7000 08:03 1316125                    /lib/x8664-linux-gnu/libc-2.27.so
+7f846d224000-7f846d226000 rw-p 001eb000 08:03 1316125                    /lib/x86_64-linux-gnu/libc-2.27.so
+7f846d226000-7f846d22a000 rw-p 00000000 00:00 0 
+7f846d22a000-7f846d253000 r-xp 00000000 08:03 1316116                   /lib/x86_64-linux-gnu/ld-2.27.so
+7f846d43f000-7f846d441000 rw-p 00000000 00:00 0 
+7f846d453000-7f846d454000 r--p 00029000 08:03 1316116                    /lib/x86_64-linux-gnu/ld-2.27.so
+7f846d454000-7f846d455000 rw-p 0002a000 08:03 1316116                   /lib/x86_64-linux-gnu/ld-2.27.so
+7f846d455000-7f846d456000 rw-p 00000000 00:00 0 
+7ffc3de03000-7ffc3de24000 rw-p 00000000 00:00 0                          [stack]
+7ffc3dfe1000-7ffc3dfe4000 r--p 00000000 00:00 0                          [vvar]
+7ffc3df4000-7ffc3dfe5000 r-xp 00000000 00:00 0                          [vdso]
 ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]
 
 ======================= mem ========================
@@ -112,6 +112,6 @@ ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsysca
 
 
 ======================= statm ======================
-1130 203 187 3 0 77 0
+1130 190 175 3 0 77 0
 
 

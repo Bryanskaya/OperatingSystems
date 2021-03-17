@@ -6,6 +6,13 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdlib.h>
+
+
+#include <sys/ptrace.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/user.h>
 
 
 void read_file_stat()
@@ -73,7 +80,7 @@ int main(int argc, char *argv[])
     f = fopen("/proc/self/cmdline", "r");   //environ - файл, содержит окружения процесса
                                             //Данные о каждом процессе хранятся в поддиректории с именем,
                                             //которым является идентификатор процесса: /proc/<PID>.
-                                            //id можно получить с помощью getid() либо использовать ссылку self
+                                            //id можно получить с помощью getpid() либо использовать ссылку self
     
     f_res = fopen("res.txt", "w");
     fprintf(f_res, "===================== cmdline ======================\n");
