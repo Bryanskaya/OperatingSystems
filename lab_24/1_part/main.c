@@ -15,42 +15,22 @@
 #include <sys/user.h>
 
 
-void read_file_stat()
-{
-    char buf[BUF_SIZE + 100];
-    char *stat_info[] = {
-        ">>> pid", ">>> comm", ">>> state", "ppid", "pgrp", \
-        "session", "tty", "tpgid", "flags", "minflt", \
-        "cminflt", "majflt", "cmajflt", ">>> utime", ">>> stime", \
+char *stat_info[] = {
+        "pid", "comm", "state", "ppid", "pgrp", \
+        "session", "tty_nr", "tpgid", "flags", "minflt", \
+        "cminflt", "majflt", "cmajflt", "utime", "stime", \
         "cutime", "cstime", "priority", "nice", "num_threads",\
-        "itrealvalue", "starttime", "vsize", ">>> rss", "rsslim",\
+        "itrealvalue", "starttime", "vsize", "rss", "rsslim",\
         "startcode", "endcode", "startstack", "kstkesp", "kstkeip", \
-        "signal", "blocked", "sigignore", "sigcatch", ">>> wchan", \
+        "signal", "blocked", "sigignore", "sigcatch", "wchan", \
         "nswap", "cnswap", "exit_signal", "processor", "rt_priority", \
         "policy", "delayacct_blkio_ticks", "guest_time", "cguest_time", "start_data", \
         "end_data", "start_brk", "arg_start", "arg_end", "env_start",
         "end_end", "exit_code", NULL };
 
-    FILE *f, *f_res;
-    int i = 0;
-    
-    f = fopen("/proc/self/stat", "r");
-    f_res = fopen("stat.txt", "w");
-
-    fread(buf, 1, BUF_SIZE, f);
-
-    char *temp = strtok(buf, " ");
-
-    while (temp != NULL) {
-        printf("%s:    %s\n", stat_info[i], temp);
-        fprintf(f_res, "%s:    %s\n", stat_info[i], temp);
-        i++;
-        temp = strtok(NULL, " ");
-    }
-
-    fclose(f);
-    fclose(f_res);
-}
+char *statm_info[] = {
+        "size", "resident", "share", "trs", "drs",
+        "lrs", "dt", NULL };
 
 
 void read_mem()
@@ -66,12 +46,39 @@ void read_mem()
         printf("%d",buf[i]);
 }
 
+
+void read_statm()
+{
+    char buf[BUF_SIZE];
+
+    FILE *f, *f_res;
+    int i = 0;
+    
+    f = fopen("/proc/self/statm", "r");
+    f_res = fopen("statm.txt", "w");
+
+    fread(buf, 1, BUF_SIZE, f);
+
+    char *temp = strtok(buf, " ");
+
+    while (temp != NULL) {
+        printf("%s:    %s\n", statm_info[i], temp);
+        fprintf(f_res, "%s:    %s\n", statm_info[i], temp);
+        i++;
+        temp = strtok(NULL, " ");
+    }
+
+    fclose(f);
+    fclose(f_res);
+}
+
 int main(int argc, char *argv[])
 {
     struct dirent *dirp;
     FILE *f, *f_res;
     DIR *dp;
     char buf[BUF_SIZE];
+    char buf_ex[BUF_SIZE + 100];
     char path[BUF_SIZE + 30];
 
     int len, i;
@@ -158,10 +165,10 @@ int main(int argc, char *argv[])
     fclose(f);
 
 
-    memset(buf, 0, BUF_SIZE);
+    /*memset(buf, 0, BUF_SIZE);
     fprintf(f_res, "\n\n======================= mem ========================\n");
 
-    read_mem();   //??????????
+    read_mem();*/
 
 
     memset(buf, 0, BUF_SIZE);
@@ -174,21 +181,42 @@ int main(int argc, char *argv[])
     memset(buf, 0, BUF_SIZE);
     fprintf(f_res, "======================= stat =======================\n");
 
-    read_file_stat(); //????????
+    i = 0;
+    
+    f = fopen("/proc/self/stat", "r");
 
+    fread(buf_ex, 1, BUF_SIZE + 100, f);
 
-    memset(buf, 0, BUF_SIZE);
-    fprintf(f_res, "\n\n======================= statm ======================\n");
+    char *temp = strtok(buf_ex, " ");
 
-    f = fopen("/proc/self/statm", "r");
-
-    fread(buf, 1, BUF_SIZE, f);
-    fprintf(f_res, "%s\n\n", buf);
+    while (temp != NULL) {
+        fprintf(f_res, "%s:    %s\n", stat_info[i], temp);
+        i++;
+        temp = strtok(NULL, " ");
+    }
 
     fclose(f);
 
-    fclose(f_res);
 
+    memset(buf, 0, BUF_SIZE);
+    fprintf(f_res, "======================= statm ======================\n");
+
+    i = 0;
+    
+    f = fopen("/proc/self/statm", "r");
+
+    fread(buf, 1, BUF_SIZE, f);
+
+    temp = strtok(buf, " ");
+
+    while (temp != NULL) {
+        fprintf(f_res, "%s:    %s\n", statm_info[i], temp);
+        i++;
+        temp = strtok(NULL, " ");
+    }
+
+    fclose(f);
+    fclose(f_res);
 
     return 0;
 }
