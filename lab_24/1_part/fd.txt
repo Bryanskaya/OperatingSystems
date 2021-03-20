@@ -1,5 +1,0 @@
-0	/dev/pts/0
-1	/dev/pts/0
-2	/dev/pts/0
-3	/proc/16108/fd
-4	/home/ekaterina/OS/OperatingSystems/lab_24/1_part/fd.txt

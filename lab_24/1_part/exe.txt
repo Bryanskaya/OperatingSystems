@@ -1,1 +1,0 @@
-/home/ekaterina/OS/OperatingSystems/lab_24/1_part/main.o
