@@ -7,7 +7,7 @@ sudo -i
 
 Перейти в папку с лабой
 ```
-cd \
+cd /
 cd home
 cd Ekaterina
 ...
