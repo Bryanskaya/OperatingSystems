@@ -1,5 +1,6 @@
 #include <linux/vmalloc.h>
 #include <linux/module.h>
+#include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/proc_fs.h>
 #include <linux/string.h>
@@ -24,7 +25,7 @@ static int cookie_index, next_fortune;  /* индекс первого своб�
                                            индекс элемента хранилища, содержащего следующую фортунку для вывода по запросу*/
 
 
-ssize_t fortune_write(struct file *file, const char __user *buff, unsigned long len, loff_t *)
+ssize_t fortune_write(struct file *file, const char __user *buff, unsigned long len, loff_t *f_pos)
 {
     int free_space = (MAX_COOKIE_LENGTH - cookie_index) + 1;
 
@@ -46,19 +47,20 @@ ssize_t fortune_write(struct file *file, const char __user *buff, unsigned long 
     return len;     // количество символов фактически записанных в cookie_pot
 }
 
-int fortune_read(char *page, char **start, off_t off, int count, void *data)
+ssize_t fortune_read(struct file *file, char __user *buff, size_t count, loff_t *f_pos)
 {
     int len;
 
-    if (!cookie_index || off > 0) // какой-то *off > 0   || )
+    if (!cookie_index || *f_pos > 0) // какой-то *off > 0   || )
         return 0;
 
     if (next_fortune >= cookie_index)
         next_fortune = 0;
 
-    len = sprintf(page, "%s\n", &cookie_pot[next_fortune]);
+    len = sprintf(buff, "%s\n", &cookie_pot[next_fortune]);
 
     next_fortune += len;
+    *f_pos += len; //
 
     return len;
 }
