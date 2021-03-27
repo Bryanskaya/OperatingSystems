@@ -25,6 +25,12 @@ static int cookie_index, next_fortune;  /* индекс первого своб�
                                            индекс элемента хранилища, содержащего следующую фортунку для вывода по запросу*/
 
 
+ssize_t fortune_write(struct file *file, const char __user *buff, unsigned long len, loff_t *f_pos);
+ssize_t fortune_read(struct file *file, char __user *buff, size_t count, loff_t *f_pos);
+static int __init init_fortune_module(void);
+static void __exit exit_fortune_module(void);
+
+
 ssize_t fortune_write(struct file *file, const char __user *buff, unsigned long len, loff_t *f_pos)
 {
     int free_space = (MAX_COOKIE_LENGTH - cookie_index) + 1;
@@ -51,13 +57,14 @@ ssize_t fortune_read(struct file *file, char __user *buff, size_t count, loff_t 
 {
     int len;
 
-    if (!cookie_index || *f_pos > 0) // какой-то *off > 0   || )
+    if (cookie_index == 0 || *f_pos > 0)
         return 0;
 
     if (next_fortune >= cookie_index)
         next_fortune = 0;
 
     len = sprintf(buff, "%s\n", &cookie_pot[next_fortune]);
+    //len = copy_to_user(buff, &cookie_pot[next_fortune], count);
 
     next_fortune += len;
     *f_pos += len; //
@@ -66,7 +73,7 @@ ssize_t fortune_read(struct file *file, char __user *buff, size_t count, loff_t 
 }
 
 
-static const struct file_operations fops = 
+static struct file_operations fops = 
 {
     .owner = THIS_MODULE,
     .read = fortune_read,
@@ -77,7 +84,7 @@ static const struct file_operations fops =
 
 static int __init init_fortune_module(void)
 {
-    cookie_pot = (char*)vmalloc(MAX_COOKIE_LENGTH);
+    cookie_pot = vmalloc(MAX_COOKIE_LENGTH);
     if (!cookie_pot)
     {
         printk(KERN_INFO "my_fortune: impossible to malloc cookie_pot");
@@ -86,7 +93,7 @@ static int __init init_fortune_module(void)
 
     memset(cookie_pot, 0, MAX_COOKIE_LENGTH);
 
-    proc_file = proc_create(PROC_FILE_NAME, 0666, NULL, &fops); //////
+    proc_file = proc_create(PROC_FILE_NAME, 0666, NULL, &fops);
 
     if (!proc_file)
     {
@@ -94,6 +101,9 @@ static int __init init_fortune_module(void)
         printk(KERN_INFO "my_fortune: can't create proc entry");
         return -ENOMEM;
     }
+
+    proc_mkdir("my_dir", NULL);
+    proc_symlink("my_slink", NULL, "/proc/my_fortune");
 
     cookie_index = 0;
     next_fortune = 0;
@@ -105,7 +115,7 @@ static int __init init_fortune_module(void)
 
 static void __exit exit_fortune_module(void)
 {
-    if (proc_file)
+    //if (proc_file)
         remove_proc_entry(PROC_FILE_NAME, NULL);
 
     if (cookie_pot)
