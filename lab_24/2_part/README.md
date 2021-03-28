@@ -8,3 +8,8 @@ http://www.interface.ru/home.asp?artId=17579
 Поэтому смотрим тут, что можно использовать, а что нет  
 https://elixir.bootlin.com/linux/v5.4/source/include/linux/fs.h  
 
+## Как работает метод read()
+
+![image](https://user-images.githubusercontent.com/54107546/112752947-32a33300-8fde-11eb-94c8-360494de9d90.png)
+
+
