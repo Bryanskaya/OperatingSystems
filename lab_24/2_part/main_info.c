@@ -9,7 +9,7 @@
 #include <asm/uaccess.h>
 
 
-#define MAX_COOKIE_LENGTH   PAGE_SIZE
+#define MAX_COOKIE_LENGTH   PAGE_SIZE   // 4 Кб
 #define PROC_FILE_NAME      "my_fortune"
 #define PROC_DIR_NAME       "my_dir"
 #define PROC_SLINK_NAME     "my_slink"
@@ -45,7 +45,8 @@ ssize_t fortune_write(struct file *filp, const char __user *buff, size_t count, 
     }
 
 /* Копирование буфера из пользовательского пространства в пространство ядра */
-//1ый аргумент - куда, 2ой - откуда, 3ий - сколько
+// 1ый аргумент - куда в пространстве ядра, 
+// 2ой - откуда из пространства пользователя, 3ий - сколько байт
     if (copy_from_user(&cookie_pot[cookie_index], buff, count)) // если место есть, то строка копируется в cookie_pot
     {
         printk(KERN_INFO "my_fortune: copy_from_user error");
@@ -76,7 +77,10 @@ ssize_t fortune_read(struct file *filp, char __user *buff, size_t count, loff_t 
     if (next_fortune >= cookie_index) // если дошли до места, куда только собираемся что-то писать
         next_fortune = 0;   // для зацикливания буфера
 
-// 1ый - куда, 2ой - формат, 3ий - откуда
+// копирует данные из ядра в пространство пользователя
+// 1ый - куда в пространстве пользователя
+// 2ой - откуда в пространстве ядра
+// количество копируемых байт
     len = strlen(&cookie_pot[next_fortune]);
     copy_to_user(buff, &cookie_pot[next_fortune], len);
 
@@ -106,7 +110,7 @@ static int __init init_fortune_module(void)
 
     memset(cookie_pot, 0, MAX_COOKIE_LENGTH);
 
-    // создаем файл
+    // создаем файл = регистрируем структуру
     // имя файла, права доступа, указатель на родительскую директорию (у нас NULL - корневой каталог /proc),
     // ук-ль на определ. нами операции на файлах (на file_operations)
     proc_file = proc_create(PROC_FILE_NAME, 0666, NULL, &fops); /* 0666 - чтение и запись всеми*/
@@ -137,6 +141,7 @@ static int __init init_fortune_module(void)
 
 static void __exit exit_fortune_module(void)
 {
+    // отменяем регистрацию
     remove_proc_entry(PROC_FILE_NAME, NULL); // имя и корневой каталог
     remove_proc_entry(PROC_DIR_NAME, NULL);
     remove_proc_entry(PROC_SLINK_NAME, NULL);
