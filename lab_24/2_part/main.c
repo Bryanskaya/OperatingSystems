@@ -11,63 +11,62 @@
 
 #define MAX_COOKIE_LENGTH   PAGE_SIZE
 #define PROC_FILE_NAME      "my_fortune"
+#define PROC_DIR_NAME       "my_dir"
+#define PROC_SLINK_NAME     "my_slink"
 
 MODULE_LICENSE("GPL");
 
 
 static struct proc_dir_entry *proc_file;
-/*static struct proc_dir_entry *proc_slink;
-static struct proc_dir_entry *proc_dir;*/
+static struct proc_dir_entry *proc_slink;
+static struct proc_dir_entry *proc_dir;
 
 
-static char* cookie_pot;    // хранилище фортунок
-static int cookie_index, next_fortune;  /* индекс первого свободного для записи элемента хранилища
-                                           индекс элемента хранилища, содержащего следующую фортунку для вывода по запросу*/
+static char* cookie_pot;
+static int cookie_index, next_fortune;
 
 
-ssize_t fortune_write(struct file *file, const char __user *buff, unsigned long len, loff_t *f_pos);
-ssize_t fortune_read(struct file *file, char __user *buff, size_t count, loff_t *f_pos);
-static int __init init_fortune_module(void);
-static void __exit exit_fortune_module(void);
-
-
-ssize_t fortune_write(struct file *file, const char __user *buff, unsigned long len, loff_t *f_pos)
+ssize_t fortune_write(struct file *filp, const char __user *buff, size_t count, loff_t *f_pos)
 {
     int free_space = (MAX_COOKIE_LENGTH - cookie_index) + 1;
 
-    if (free_space < len)   // достаточно ли места для размещения фортунки
+    if (free_space < count)
     {
         printk(KERN_ERR "my_fortune: cookie_pot is overflowed");
         return -EFAULT;
     }
 
-    if (copy_from_user(&cookie_pot[cookie_index], buff, len)) // если место есть, то строка копируется в cookie_pot
+    if (copy_from_user(&cookie_pot[cookie_index], buff, count))
     {
         printk(KERN_INFO "my_fortune: copy_from_user error");
         return -EFAULT;
     }
     
-    cookie_index += len;
-    cookie_pot[cookie_index - 1] = 0;
+    cookie_index += count;
+    cookie_pot[cookie_index - 1] = '\n';
 
-    return len;     // количество символов фактически записанных в cookie_pot
+    cookie_pot[cookie_index] = 0;
+    cookie_index += 1;
+
+    return count;
 }
 
-ssize_t fortune_read(struct file *file, char __user *buff, size_t count, loff_t *f_pos)
+
+ssize_t fortune_read(struct file *filp, char __user *buff, size_t count, loff_t *f_pos)
 {
     int len;
 
-    if (cookie_index == 0 || *f_pos > 0)
+    if (!cookie_index || *f_pos > 0)
         return 0;
 
     if (next_fortune >= cookie_index)
-        next_fortune = 0;
+        next_fortune = 0; 
 
-    len = sprintf(buff, "%s\n", &cookie_pot[next_fortune]);
-    //len = copy_to_user(buff, &cookie_pot[next_fortune], count);
+    len = strlen(&cookie_pot[next_fortune]);
+    copy_to_user(buff, &cookie_pot[next_fortune], len);
 
-    next_fortune += len;
-    *f_pos += len; //
+    next_fortune += len + 1;
+    *f_pos += len;
 
     return len;
 }
@@ -79,7 +78,6 @@ static struct file_operations fops =
     .read = fortune_read,
     .write = fortune_write,
 };
-
 
 
 static int __init init_fortune_module(void)
@@ -94,16 +92,22 @@ static int __init init_fortune_module(void)
     memset(cookie_pot, 0, MAX_COOKIE_LENGTH);
 
     proc_file = proc_create(PROC_FILE_NAME, 0666, NULL, &fops);
-
     if (!proc_file)
     {
         vfree(cookie_pot);
-        printk(KERN_INFO "my_fortune: can't create proc entry");
+        printk(KERN_INFO "my_fortune: proc_create error");
         return -ENOMEM;
     }
 
-    proc_mkdir("my_dir", NULL);
-    proc_symlink("my_slink", NULL, "/proc/my_fortune");
+    proc_dir = proc_mkdir(PROC_DIR_NAME, NULL);
+    proc_slink = proc_symlink(PROC_SLINK_NAME, NULL, PROC_FILE_NAME);
+
+    if (!proc_dir || !proc_slink)
+    {
+        vfree(cookie_pot);
+        printk(KERN_INFO "my_fortune: proc_mkdir/proc_slink error");
+        return -ENOMEM;
+    }
 
     cookie_index = 0;
     next_fortune = 0;
@@ -115,8 +119,9 @@ static int __init init_fortune_module(void)
 
 static void __exit exit_fortune_module(void)
 {
-    //if (proc_file)
-        remove_proc_entry(PROC_FILE_NAME, NULL);
+    remove_proc_entry(PROC_FILE_NAME, NULL);
+    remove_proc_entry(PROC_DIR_NAME, NULL);
+    remove_proc_entry(PROC_SLINK_NAME, NULL);
 
     if (cookie_pot)
         vfree(cookie_pot);
