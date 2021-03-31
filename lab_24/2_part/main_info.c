@@ -141,7 +141,7 @@ static int __init init_fortune_module(void)
 
 static void __exit exit_fortune_module(void)
 {
-    // отменяем регистрацию
+    // удаляем созданные структуры
     remove_proc_entry(PROC_FILE_NAME, NULL); // имя и корневой каталог
     remove_proc_entry(PROC_DIR_NAME, NULL);
     remove_proc_entry(PROC_SLINK_NAME, NULL);
@@ -154,5 +154,5 @@ static void __exit exit_fortune_module(void)
 
 
 
-module_init(init_fortune_module);
+module_init(init_fortune_module); // макросы, инициализирующие...
 module_exit(exit_fortune_module);
