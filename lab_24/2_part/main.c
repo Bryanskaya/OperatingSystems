@@ -11,6 +11,7 @@
 
 #define MAX_COOKIE_LENGTH   PAGE_SIZE
 #define PROC_FILE_NAME      "my_fortune"
+#define PROC_FILE_NAME_2    "my_fortune_2"
 #define PROC_DIR_NAME       "my_dir"
 #define PROC_SLINK_NAME     "my_slink"
 
@@ -18,6 +19,7 @@ MODULE_LICENSE("GPL");
 
 
 static struct proc_dir_entry *proc_file;
+static struct proc_dir_entry *proc_file_2;
 static struct proc_dir_entry *proc_slink;
 static struct proc_dir_entry *proc_dir;
 
@@ -71,12 +73,20 @@ ssize_t fortune_read(struct file *filp, char __user *buff, size_t count, loff_t 
     return len;
 }
 
+int my_open(struct inode *ind, struct file *filp)
+{
+    printk(KERN_INFO "***** File was opened! *****");
+
+    return 0;
+}
+
 
 static struct file_operations fops = 
 {
     .owner = THIS_MODULE,
     .read = fortune_read,
     .write = fortune_write,
+    .open = my_open,
 };
 
 
@@ -99,6 +109,8 @@ static int __init init_fortune_module(void)
         return -ENOMEM;
     }
 
+    proc_file_2 = proc_create(PROC_FILE_NAME_2, 0666, NULL, &fops);
+
     proc_dir = proc_mkdir(PROC_DIR_NAME, NULL);
     proc_slink = proc_symlink(PROC_SLINK_NAME, NULL, PROC_FILE_NAME);
 
@@ -120,6 +132,7 @@ static int __init init_fortune_module(void)
 static void __exit exit_fortune_module(void)
 {
     remove_proc_entry(PROC_FILE_NAME, NULL);
+    remove_proc_entry(PROC_FILE_NAME_2, NULL);
     remove_proc_entry(PROC_DIR_NAME, NULL);
     remove_proc_entry(PROC_SLINK_NAME, NULL);
 
