@@ -87,3 +87,7 @@ struct stat {
 
 ## FILE * fopen(const char * path, const char * mode);
 Также **создает** новый файловый дескриптор типа int для открытого файла и запись в общесистемной таблице открытых файлов. 
+
+---
+#### Предположения:
+1. 2 программа с read()/write() - ltvjycnhfwbz yt,eathbpbhjdfyyjuj ddjlf/dsdjlf
