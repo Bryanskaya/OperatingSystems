@@ -72,10 +72,6 @@ int main()
         i += 2;
     }
 
-    fclose(fd1);
-    stat(FILENAME, &sbuf);
-    printf("\n>>> inode: %d\t size: %d\n", (int)sbuf.st_ino, (int)sbuf.st_size);
-
     if (pthread_join(tid, NULL))
     {
         printf("ERROR: in joining thread");
@@ -87,6 +83,11 @@ int main()
         return -1;
     }
 
+    fclose(fd1);
+    stat(FILENAME, &sbuf);
+    printf("\n>>> inode: %d\t size: %d\n", (int)sbuf.st_ino, (int)sbuf.st_size);
+
+    printf("\n");
 
     return 0;
 }
