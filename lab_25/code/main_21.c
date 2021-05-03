@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #define FILENAME    "alphabet.txt"
 
@@ -33,6 +34,8 @@ int main()
         if (flag2)
             write(1,&c,1);
     }
+
+    printf("\n");
 
     return 0;
 }
