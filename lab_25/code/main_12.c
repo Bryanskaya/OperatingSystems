@@ -64,6 +64,8 @@ int main()
         printf("ERROR: mistake in joining thread");
         return -1;
     }
+    
+    printf("\n");
 
     return 0;
 }
