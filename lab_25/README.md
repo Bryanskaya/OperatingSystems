@@ -33,3 +33,8 @@
 # ssize_t read(int fd, void *buf, size_t count)
 
  Пытается записать count байтов файлового дескриптора типа int (fd) в буфер, адрес которого начинается с buf. 
+ 
+ # ssize_t write(int fd, const void *buf, size_t count)
+ 
+ Записывает до count байтов из буфера buf в файл, на который ссылается файловый описатель fd
+ 
