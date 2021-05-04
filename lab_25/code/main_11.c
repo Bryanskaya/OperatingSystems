@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <fcntl.h>  // open()
+#include <fcntl.h>
 #include <string.h>
 
 #define FILENAME    "alphabet.txt"
@@ -7,15 +7,15 @@
 
 int main()
 {
-    int fd = open(FILENAME, O_RDONLY);  // процесс получает дескриптор файла типа int 
+    int fd = open(FILENAME, O_RDONLY);  
     if (fd == -1)                       
     {
         printf("ERROR: can't open file %d", fd);
         return -1;
     }
 
-    FILE *fs1 = fdopen(fd, "r");    // передаётся файловый дескриптор, в результате выполнения - получаем указатель на структуру FILE
-    char buff1[SIZE];               // FILE - ссылается на буфер
+    FILE *fs1 = fdopen(fd, "r");
+    char buff1[SIZE];               
     setvbuf(fs1, buff1, _IOFBF, SIZE);
 
     FILE *fs2 = fdopen(fd, "r");
