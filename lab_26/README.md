@@ -175,12 +175,19 @@ struct timeval
 };
 ```
 
-## FD_ZERO
+## void FD_ZERO(fd_set * set);
+- очищает набор
 
-## FD_SET
+## void FD_SET(int fd, fd_set * set);
+- добавляют заданный дескриптор к набору
 
-## FD_ISSET
+## int FD_ISSET(int fd, fd_set * set);
+- проверяет, является ли дескриптор частью набора
 
-## select
+## int select(int nfds, fd_set * readfds, fd_set * writefds, fd_set * exceptfds, struct timeval * utimeout);
+- используется для слежения за несколькими файловыми дескрипторами — для ожидания, когда какой-то из них не станет «готов» к чтению/записи данных, или с файловым дескриптором не возникнет «исключительная ситуация»
+> err = select(max_fd + 1, &set, NULL, NULL, &interval);
+1 параметр - целое число, на единицу большее максимального файлового дескриптора в любом из наборов
+2 параметр - 
 
 ## accept
