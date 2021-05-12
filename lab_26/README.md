@@ -93,4 +93,33 @@ struct sockaddr
 - Перед выходом из программы-сервера следует удалить файл сокета, созданный в результате вызова socket(), что  делается с помощью функции unlink().
 
 
-# 2 программа
+# 2 программа (я так думаю, на сетевые сокеты)
+## struct hostent * server;
+- содержит имя сервера в приемлемом для дальнейшего использования виде  
+```c
+struct hostent 
+{
+	char FAR * h_name;			// имя хоста
+	char FAR * FAR * h_aliases;		// дополнительные названия
+	short h_addrtype;			// тип адреса
+	short h_length;			// длинна каждого адреса в байтах
+	char FAR * FAR * h_addr_list;	// список адресов
+};
+```
+
+##  struct sockaddr_in
+- Для сетевого взаимодействия
+```c
+struct sockaddr_in
+ { 
+    short int sin_family; // Семейство адресов
+    unsigned short int sin_port; // Номер порта
+    struct in_addr sin_addr; // IP-адрес
+    unsigned char sin_zero[8]; // Дополнение до размера структуры sockaddr
+ };
+```
+## struct hostent * gethostbyname(const char * name);
+- получает указатель на строку с Интернет-именем сервера (например, www.unix.com или 192.168.1.16)
+- возвращает указатель на структуру hostent, которая содержит имя сервера в приемлемом для дальнейшего использования виде
+
+## 
