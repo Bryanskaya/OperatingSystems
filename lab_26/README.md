@@ -18,6 +18,8 @@ struct sockaddr
 };
 ```
 ## int socket (int domain, int type, int protocol);
+> sock = socket(AF_INET, SOCK_STREAM, 0);
+
 1. В нашем случае 1 параметр, домен = **AF_UNIX**
 > Домен, обозначенный константой AF_UNIX, соответствует сокетам в файловом пространстве имен (cемейство сокетов AF_UNIX используется для взаимодействия между процессами на **одной** машине). 
 2. 2 параметр - **тип сокета**. 
@@ -29,7 +31,7 @@ struct sockaddr
 Возвращает целое положительное число - **номер дескриптора сокета** (то есть создается дескриптор сокета)
 
 ## ssize_t sendto(int sockfd, const void * buf, size_t len, int flags, const struct sockaddr * dest_addr, socklen_t addrlen);
-> отправляют данные в сокет
+- отправляют данные в сокет
 > err = sendto(sock, buf, strlen(buf), 0, &srvr_name, sizeof(srvr_name));  
 
 1 параметр - дескриптор сокета  
@@ -57,9 +59,20 @@ struct sockaddr
 ```
 
 ## int bind(int sockfd, struct sockaddr * my_addr, socklen_t addrlen);
-> связывает сокет с заданным адресом (**связывать сокет с адресом необходимо в программе-сервере, но не в клиенте**)  
-> bind(sock, (struct sockaddr*) &serv_addr, sizeof(serv_addr))  
+- связывает сокет с заданным адресом (**связывать сокет с адресом необходимо в программе-сервере, но не в клиенте**)  
+> bind(sock, &srvr_name, sizeof(srvr_name)) 
 
 1 параметр - дескриптор сокета  
 2 параметр - указатель на структуру sockaddr (переменная srvr_name), содержащую адрес, на котором регистрируется сервер  
 3 параметр - длина структуры, содержащей адрес  
+
+## int recvfrom(int s, void * buf, size_t len, int flags, struct sockaddr * from, socklen_t * fromlen);
+- принимает данные из сокета
+> len = recvfrom(sock, buf, sizeof(buf), 0, NULL, NULL);
+
+1 параметр -  
+2 параметр -  
+3 параметр -  
+4 параметр -  
+5 параметр -  
+6 параметр -  
