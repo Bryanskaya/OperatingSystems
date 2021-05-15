@@ -108,7 +108,7 @@
 ```c
 struct sockaddr 
 { 
-       unsigned short sa_family; // Семейство адресов, AF_xxx 
+       unsigned short sa_family; // Семейство адресов, AF_xxx (набор адресов, которые могут быть использованы для данного сокета)
        char sa_data[14]; // 14 байтов для хранения адреса 
 };
 ```
