@@ -58,8 +58,9 @@ void process_client(int fd, int ind)
 int main()
 {
     struct sockaddr_in serv_addr;
-    int max_fd, err, fd;
+    int max_fd, err, fd, new_sock, rsize;
     fd_set set;
+    char buf[SIZE];
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) 
@@ -124,12 +125,19 @@ int main()
         
         if (FD_ISSET(sock, &set))
         {
-            err = process_new_client();
-            if (err)
-            {
-                close_socket();
-                perror("ERROR: process new client failed");
+            new_sock = accept(sock, NULL, NULL);
+            if (new_sock < 0) 
                 return EXIT_FAILURE;
+
+            printf("New connection added\n");
+
+            for (int i = 0; i < NUM; i++) 
+            {
+                if (!clients_arr[i]) 
+                {
+                    clients_arr[i] = new_sock;
+                    break;
+                }
             }
         }
 
@@ -137,7 +145,19 @@ int main()
         {
             fd = clients_arr[i];
             if ((fd > 0) && FD_ISSET(fd, &set))
-                process_client(fd, i);
+            {
+                rsize = recvfrom(fd, buf, SIZE, 0, NULL, NULL);
+                if (!rsize)
+                {
+                    printf("Client was disconnected\n");
+                    clients_arr[i] = 0;
+                }
+                else
+                {
+                    buf[rsize] = '\0';
+                    printf("Server got: %s\n", buf);
+                } 
+            }
         }
     }
 
