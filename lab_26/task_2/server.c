@@ -18,47 +18,10 @@ void close_socket()
     close(sock);
 }
 
-int process_new_client()
-{
-    int new_sock = accept(sock, NULL, NULL);
-    if (new_sock < 0) 
-        return EXIT_FAILURE;
-
-    printf("New connection added\n");
-
-    for (int i = 0; i < NUM; i++) {
-        if (!clients_arr[i]) 
-        {
-            clients_arr[i] = new_sock;
-            break;
-        }
-    }
-
-    return 0;
-}
-
-void process_client(int fd, int ind)
-{
-    char buf[SIZE];
-
-    int rsize = recvfrom(fd, buf, SIZE, 0, NULL, NULL);
-    if (!rsize)
-    {
-        printf("Client was disconnected\n");
-        clients_arr[ind] = 0;
-    }
-    else
-    {
-        buf[rsize] = '\0';
-        printf("Server got: %s\n", buf);
-    } 
-    
-}
-
 int main()
 {
     struct sockaddr_in serv_addr;
-    int max_fd, err, fd, new_sock, rsize;
+    int max_fd, err, fd, new_sock, rsize, flag;
     fd_set set;
     char buf[SIZE];
 
@@ -126,17 +89,18 @@ int main()
         if (FD_ISSET(sock, &set))
         {
             new_sock = accept(sock, NULL, NULL);
+            flag = 1;
             if (new_sock < 0) 
                 return EXIT_FAILURE;
 
             printf("New connection added\n");
 
-            for (int i = 0; i < NUM; i++) 
+            for (int i = 0; i < NUM && flag); i++) 
             {
                 if (!clients_arr[i]) 
                 {
                     clients_arr[i] = new_sock;
-                    break;
+                    flag = 0;
                 }
             }
         }
