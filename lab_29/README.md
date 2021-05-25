@@ -96,6 +96,7 @@ IRQ 15 — ATA channel 2
 ## void synchronize_irq(unsigned int irq);
 - ожидает пока завершится обработчик прерывания от линии IRQ (если он выполняется)
 > хорошая идея — всегда вызывать эту функцию перед выгрузкой модуля использующего эту линию IRQ; @Цилюрик
+> НО ВНИМАНИЕ: If you use this function while holding a resource the IRQ handler may need you will **deadlock**. 
 
 ##
 ##
