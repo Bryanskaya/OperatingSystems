@@ -20,10 +20,9 @@ struct myfs_inode
 
 
 static int sco = 0;
-/*static int busy = 0;               */
 static int number = 31;
 struct kmem_cache *cache = NULL; 
-static void* *line = NULL;
+static void **line = NULL;
 static int size = sizeof(struct myfs_inode);
 
 
@@ -33,15 +32,6 @@ void co(void* p)
     sco++; 
 } 
 
-/*struct myfs_inode *get_inode_from_cache(void) 
-{
-    if (busy == number)
-        return NULL;
-
-    line[busy] = kmem_cache_alloc(cache, GFP_KERNEL);
-
-    return line[busy++];
-}*/
 
 static void myfs_put_super(struct super_block* sb)
 {
@@ -58,7 +48,6 @@ static struct super_operations const myfs_super_ops =
 static struct inode *myfs_make_inode(struct super_block * sb, int mode)
 {
     struct inode *ret = new_inode(sb);
-    /*struct myfs_inode *my_inode = NULL;*/
 
     if (ret)
     {
@@ -66,18 +55,7 @@ static struct inode *myfs_make_inode(struct super_block * sb, int mode)
 
         ret->i_size = PAGE_SIZE;
         ret->i_atime = ret->i_mtime = ret->i_ctime = current_time(ret);
-        
-        /*my_inode = get_inode_from_cache();
-        if (my_inode) {
-            my_inode->i_mode = ret->i_mode;
-            my_inode->i_ino = ret->i_ino;
-        }
-        
-        ret->i_private = my_inode;*/
-
         ret->i_private = &myfs_inode;
-
-
     }
 
     printk(KERN_INFO ">>> New inode was creared\n");
@@ -97,7 +75,7 @@ static int myfs_fill_sb(struct super_block* sb, void* data, int silent)
     root = myfs_make_inode(sb, S_IFDIR | 0755);
     if (!root)
     {
-        printk (KERN_ERR ">>> MYFS inode allocation failed!\n") ;
+        printk (KERN_ERR ">>> MYFS inode allocation failed!\n");
         return -ENOMEM;
     }
 
@@ -107,10 +85,12 @@ static int myfs_fill_sb(struct super_block* sb, void* data, int silent)
 
     if (!sb->s_root)
     {
-        printk(KERN_ERR ">>> MYFS root creation failed!\n") ;
+        printk(KERN_ERR ">>> MYFS root creation failed!\n");
         iput(root);
         return -ENOMEM;
     }
+
+    printk(KERN_INFO ">>> MYFS root creation successed!\n");
 
     return 0;
 }
@@ -137,9 +117,9 @@ static struct file_system_type myfs_type = {
 
 static int __init md_init(void)
 {
-    int i, j, ret; 
+    int ret; 
  
-    line = kmalloc(sizeof(void*) *number, GFP_KERNEL); 
+    line = kmalloc(sizeof(void*), GFP_KERNEL); 
     if(!line)
     { 
         printk(KERN_ERR ">>> kmalloc error\n"); 
@@ -154,31 +134,21 @@ static int __init md_init(void)
 	    return -ENOMEM;  
     } 
 
-    for(i = 0; i < number; i++)
+    if (!((*line) = kmem_cache_alloc(cache, GFP_KERNEL)))
     {
-        line[i] = kmem_cache_alloc(cache, GFP_KERNEL);
+        printk(KERN_ERR ">>> kmem_cache_alloc error\n"); 
 
-        if(!line[i])
-        { 
-            printk(KERN_ERR ">>> kmem_cache_alloc error\n"); 
-            
-            for(j = 0; j < i; j++) 
-	            kmem_cache_free(cache, line[j]);  
-	        
-            kmem_cache_destroy(cache); 
-	        kfree(line); 
-	        
-            return -ENOMEM; 
-        }
+        kmem_cache_free(cache, *line);
+        kmem_cache_destroy(cache);
+        kfree(line);
+
+        return -ENOMEM;
     }
         
     ret = register_filesystem(&myfs_type);
     if (ret)
     {
         printk(KERN_ERR ">>> MYFS_MODULE can not register filesystem!\n");
-
-        for(j = 0; j < number; j++) 
-            kmem_cache_free(cache, line[j]);  
         
         kmem_cache_destroy(cache); 
         kfree(line);
@@ -197,16 +167,11 @@ static int __init md_init(void)
 
 static void __exit md_exit(void)
 {
-    int i, ret;
-
-    for(i = 0; i < number; i++) 
-        kmem_cache_free(cache, line[i]); 
-
+    kmem_cache_free(cache, *line);
     kmem_cache_destroy(cache); 
     kfree(line);
     
-    ret = unregister_filesystem(&myfs_type);
-    if (ret)
+    if (unregister_filesystem(&myfs_type))
         printk(KERN_ERR ">>> MYFS_MODULE can not unregister filesystem!\n");
 
     printk(KERN_INFO ">>> MYFS_MODULE unloaded!\n");
