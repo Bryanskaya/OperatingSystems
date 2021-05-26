@@ -143,11 +143,11 @@ struct tasklet_struct
 экземпляр структуры **struct tasklet_struct**  
 ### Динамически
 С помощью функции:  
-tasklet_init(t, tasklet_handler, dev);  
+## tasklet_init(t, tasklet_handler, dev);  
 где t - указатель на структуру struct tasklet_struct
 
 
-##
+
 ##
 ##
 ##
