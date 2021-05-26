@@ -77,7 +77,11 @@ IRQ 15 — ATA channel 2
 3.4  XT-PIC-XT-PIC — прерывание на PIC контроллер  
 4. Последняя колонка: устройство, ассоциированное с данным прерыванием
 
+---
+
 # ЛАБОРАТОРНАЯ РАБОТА
+# 1 программа
+
 ## int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags, const char* name, void * dev);
 - регистрирует на определённой линии IRQ обработчик аппаратного прерывания
 - параметры:
@@ -146,6 +150,7 @@ struct tasklet_struct
 ## tasklet_init(t, tasklet_handler, dev);  
 где t - указатель на структуру struct tasklet_struct
 
+---
 
 
 ##
