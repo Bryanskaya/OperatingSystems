@@ -45,7 +45,7 @@ static int __init my_init(void)
 {
     tasklet_init(&my_tasklet, show_info_tasklet, (unsigned long) &data);    //
 
-    if (request_irq(irq, my_interrupt, IRQF_SHARED, "my_interrupt", &my_dev_id))
+    if (request_irq(irq, my_interrupt, IRQF_SHARED, "my_int_keyboard_tasklet", &my_dev_id))
     {
         printk(KERN_INFO ">>> ERROR: request_irq failed");
         return -1;
@@ -57,10 +57,9 @@ static int __init my_init(void)
 
 static void __exit my_exit(void)
 {
-    tasklet_kill(&my_tasklet);
-
     synchronize_irq(irq);
     free_irq(irq, &my_dev_id);
+    tasklet_kill(&my_tasklet);
     printk(KERN_INFO "---------- Module was unloaded ----------");
 }
 
