@@ -6,3 +6,6 @@ https://drive.google.com/drive/folders/1286IfA-f94mSV-c-KzctOnhijypkI3Nw?usp=sha
 
 # Материал к экзамену 1 семестр
 https://app.gitbook.com/@bamonka-booba/s/os-5/v/master/
+
+# Материал к экзамену 2 семестр
+https://app.gitbook.com/@os-2/s/os-6/
